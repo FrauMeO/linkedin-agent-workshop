@@ -1,0 +1,10 @@
+{
+  "name": "session-25-live",
+  "private": true,
+  "scripts": {
+    "app": "node app/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

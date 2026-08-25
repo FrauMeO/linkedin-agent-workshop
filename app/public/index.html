@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session 25 — LinkedIn Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">session-25-live</p>
+          <h1>LinkedIn agent — web skin</h1>
+        </div>
+        <div class="model-pill" id="runState">Idle</div>
+      </header>
+
+      <main class="workspace">
+        <section class="control-panel" aria-labelledby="topicLabel">
+          <form id="briefForm" class="topic-form">
+            <label for="contentPlanInput">From content plan</label>
+            <select id="contentPlanInput">
+              <option value="">— pick a planned topic —</option>
+            </select>
+
+            <label id="topicLabel" for="topicInput">Topic</label>
+            <textarea
+              id="topicInput"
+              name="topic"
+              rows="3"
+              placeholder="Why AI adoption fails when teams buy tools before redesigning workflows"
+              required
+            ></textarea>
+
+            <label for="audiencePreset">Audience</label>
+            <select id="audiencePreset">
+              <option value="">— pick an ICP —</option>
+              <option value="Design / Mechanical Engineer">Design / Mechanical Engineer</option>
+              <option value="Procurement / Sourcing Manager">Procurement / Sourcing Manager</option>
+              <option value="Procurement / Manufacturing Engineer">Procurement / Manufacturing Engineer</option>
+              <option value="OEM / Product Manager">OEM / Product Manager</option>
+              <option value="__custom__">Other (custom)…</option>
+            </select>
+            <input
+              id="audienceInput"
+              name="audience"
+              type="text"
+              placeholder="Outskill learners, mixed technical level"
+              class="hidden"
+            />
+
+            <label for="povInput">Point of view</label>
+            <input id="povInput" name="pointOfView" type="text" placeholder="Buying a tool is not adoption." />
+
+            <label for="actionInput">Desired action</label>
+            <input id="actionInput" name="desiredAction" type="text" placeholder="Map one workflow before buying another seat." />
+
+            <label for="lengthInput">Length</label>
+            <select id="lengthInput" name="length">
+              <option value="short">Short</option>
+              <option value="medium" selected>Medium</option>
+              <option value="long">Long</option>
+            </select>
+
+            <label for="orientationInput">Image orientation</label>
+            <select id="orientationInput" name="orientation">
+              <option value="portrait" selected>Portrait (4:5 feed)</option>
+              <option value="landscape">Landscape (wide)</option>
+            </select>
+
+            <div class="button-row">
+              <button type="button" id="researchButton">Research</button>
+              <button type="button" id="writeButton">Write</button>
+              <button type="button" id="imageButton">Image</button>
+              <button type="submit" id="fullRunButton" class="primary">Full run</button>
+            </div>
+          </form>
+
+          <div class="status-list" aria-live="polite">
+            <div class="status-item" data-step="research">
+              <span></span>
+              <p>Research</p>
+            </div>
+            <div class="status-item" data-step="write">
+              <span></span>
+              <p>Write</p>
+            </div>
+            <div class="status-item" data-step="image">
+              <span></span>
+              <p>Image</p>
+            </div>
+          </div>
+
+          <div id="progressPanel" class="progress-panel hidden">
+            <div class="progress-track">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <p id="progressLabel" class="progress-label">Starting…</p>
+            <div id="activityLog" class="activity-log" aria-live="polite"></div>
+          </div>
+
+          <div id="metaPanel" class="meta-panel hidden"></div>
+          <div id="errorPanel" class="error-panel hidden"></div>
+
+          <div class="posts-list">
+            <p class="posts-list-label">Posts folders</p>
+            <div id="postsList" class="posts-gallery"></div>
+          </div>
+        </section>
+
+        <section class="file-panel" aria-label="Generated files">
+          <div class="tabs" role="tablist" aria-label="Generated content">
+            <button class="tab active" type="button" data-tab="research">research.md</button>
+            <button class="tab" type="button" data-tab="post">post.md</button>
+            <button class="tab" type="button" data-tab="image-prompt">image-prompt.md</button>
+          </div>
+
+          <div class="file-header">
+            <p id="fileLabel">research.md</p>
+            <a id="fileLink" class="file-link hidden" href="#" target="_blank" rel="noreferrer">Open</a>
+          </div>
+
+          <pre id="fileViewer" class="file-viewer">No file generated yet.</pre>
+        </section>
+
+        <section class="preview-panel" aria-label="LinkedIn preview">
+          <div class="preview-toolbar">
+            <p>Feed preview</p>
+            <span id="previewStatus">Waiting</span>
+          </div>
+
+          <article class="linkedin-card">
+            <header class="post-author">
+              <div class="avatar">S25</div>
+              <div class="author-copy">
+                <strong>Session 25</strong>
+                <span>Live-build agent</span>
+                <span>Now</span>
+              </div>
+              <button type="button" class="follow-button">Follow</button>
+            </header>
+
+            <div id="previewText" class="preview-text">
+              Your generated LinkedIn post will appear here.
+            </div>
+
+            <div id="imageFrame" class="image-frame">
+              <span>Image pending</span>
+            </div>
+
+            <footer class="post-actions">
+              <button type="button">Like</button>
+              <button type="button">Comment</button>
+              <button type="button">Repost</button>
+              <button type="button">Send</button>
+            </footer>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

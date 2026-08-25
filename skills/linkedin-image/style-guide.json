@@ -1,0 +1,103 @@
+{
+  "style": {
+    "name": "Editorial scale-play poster system",
+    "format": "Portrait social poster. Use 4:5 when the provider supports it; otherwise use the closest supported portrait size.",
+    "look": "Premium editorial campaign art: one clear visual idea, an oversized or unusually staged hero subject, sparse set design, magazine-grade typography, and a controlled studio finish.",
+    "principle": "Translate the post's argument into one memorable visual tension. Do not illustrate every point or decorate the canvas."
+  },
+  "composition": {
+    "hero_rule": "One dominant hero object, figure, or paired human-object relationship. It should occupy roughly 45-80% of the canvas and be legible at phone size.",
+    "negative_space": "Reserve deliberate empty space for the display word or short headline. Empty space is an active compositional element, not an unfinished background.",
+    "depth": "Use a seamless studio floor, a soft horizon, or a simple material field. Shadows and reflections may ground the subject; backgrounds must remain quiet.",
+    "text_hierarchy": "Use one large display word or 2-5 word headline. An optional small label or one-line takeaway may sit at the top edge or bottom edge. Never turn the poster into a text slide.",
+    "layers": [
+      "single-colour or softly tonal backdrop",
+      "oversized display type or reserved headline field",
+      "one hero subject or human-object pairing",
+      "grounding shadow or restrained reflection",
+      "optional small editorial label / takeaway"
+    ]
+  },
+  "archetypes": [
+    {
+      "name": "scale-shift",
+      "use_when": "The post is about leverage, a tool, a system, an obstacle, a product, or a choice.",
+      "layout": "Make one familiar object improbably large; place a person beside, against, on, or operating it so the relationship explains the idea."
+    },
+    {
+      "name": "hero-object",
+      "use_when": "The post has one unmistakable product, tool, result, or symbol.",
+      "layout": "Centre or lower-centre the hero object. A small person may interact with it, or omit the person entirely. Let a giant display word sit behind or above it."
+    },
+    {
+      "name": "human-scale",
+      "use_when": "The post is about agency, craft, performance, confidence, or a personal decision.",
+      "layout": "Use one full-body figure in an expressive but believable pose. Give the figure a wide field of negative space and one pool of light or shadow."
+    },
+    {
+      "name": "framing-hands",
+      "use_when": "The post is about choice, options, collaboration, comparison, or curation.",
+      "layout": "Crop several hands or partial figures from the edges so they present, pass, or frame a small set of related objects around a clear central label."
+    },
+    {
+      "name": "surreal-collage",
+      "use_when": "The post benefits from an unexpected metaphor rather than a literal product or person.",
+      "layout": "Pair one clean cutout-style subject with one incongruous natural or everyday element. Keep the composition sparse and the metaphor immediately readable."
+    }
+  ],
+  "subject": {
+    "people": "When a person is included, use an editorial, assured pose with natural anatomy and a real interaction with the object or space. A person provides scale and meaning; they are not decorative stock talent.",
+    "objects": "Objects should be tactile and materially believable: precise edges, visible fabric, plastic, glass, metal, or paper detail, and accurate contact shadows.",
+    "scale": "Scale shifts are encouraged when they clarify the post's core idea. The visual must still feel physically staged, not like a random fantasy scene.",
+    "count": "Default to one hero subject. Use multiple objects or hands only for the framing-hands archetype."
+  },
+  "photography_and_finish": {
+    "medium": "Photorealistic or highly polished digital compositing, styled like an editorial advertising poster. Illustration is permitted only when the topic clearly calls for it, and must still use the same sparse hierarchy.",
+    "lighting": "Soft directional studio light, a single controlled spotlight, or clean daylight. Use shadows and subtle reflection to create depth.",
+    "texture": "Retain believable material texture and very light film/paper grain. Avoid plastic skin, excessive HDR, generic AI gloss, and busy effects."
+  },
+  "typography": {
+    "display": "Use a large, clean, condensed or grotesk sans-serif display word. It may sit behind the hero subject, above it, or in reserved negative space. High contrast and a strong silhouette matter more than novelty.",
+    "supporting": "Optional small editorial text: neat sans-serif, restrained tracking, at an edge of the composition. Keep it to one short line or two very short lines.",
+    "text_rule": "Use only exact, user-approved text. If accurate text is important, make it short. Never use a logo, an invented brand name, an attribution, a URL, a watermark, or decorative filler copy.",
+    "safe_area": "Keep type clear of faces, key object details, and the bottom edge where social interfaces may crop."
+  },
+  "colour": {
+    "rule": "Choose one dominant background field plus a compact palette of 2-4 supporting colours. The hero subject supplies contrast; use one restrained accent only when it carries meaning.",
+    "background_options": ["powder blue", "burnt orange", "soft warm white", "charcoal navy", "concrete grey", "muted olive", "black studio void"],
+    "treatment": "Prefer a single saturated field, warm neutral, or near-black field. A subtle natural studio falloff is allowed; do not use decorative gradients, neon glows, rainbow palettes, or noisy textures."
+  },
+  "adaptation": {
+    "keep": [
+      "one visual idea",
+      "bold portrait hierarchy",
+      "oversized hero scale or a deliberate human-object relationship",
+      "substantial negative space",
+      "editorial typography",
+      "controlled palette",
+      "premium studio/editorial finish"
+    ],
+    "change": [
+      "archetype",
+      "hero subject",
+      "human role and pose",
+      "object scale",
+      "visual metaphor",
+      "background field",
+      "display word / short headline",
+      "accent colour"
+    ],
+    "selection_rule": "Choose the archetype that best expresses the post's central claim. Do not force a person, product, streetwear outfit, or surrealism into every post."
+  },
+  "prompt_template": "Create an original portrait LinkedIn editorial poster using the editorial scale-play poster system. Visual archetype: [ARCHETYPE]. Core visual idea: [VISUAL_IDEA]. Hero subject: [SUBJECT]. Human role, if any: [HUMAN_ROLE]. Interaction or action: [ACTION_OR_RELATIONSHIP]. Compose it with [COMPOSITION], substantial intentional negative space, and a quiet [BACKGROUND] studio backdrop. Use [PALETTE] with a premium photorealistic editorial campaign finish: believable material texture, precise edges, soft directional studio lighting, grounded contact shadows, and a subtle reflection only if it supports the composition. Set the exact display text '[HEADLINE]' in [DISPLAY_TYPE] with an optional small exact supporting line '[SUPPORTING_LINE]'. The text must be clean, legible, and placed away from the face and critical object details. Use one visual idea only. No logos, trademarks, copied product designs, watermarks, URLs, extra text, busy scenery, generic stock-photo posing, neon, or decorative clutter.",
+  "avoid": [
+    "copying any reference image, brand, logo, product design, or layout verbatim",
+    "multiple competing concepts",
+    "literal diagramming of every point in the post",
+    "busy backgrounds or unrelated props",
+    "generic corporate stock-art poses",
+    "cartoonish or toy-like rendering unless explicitly requested",
+    "neon glows, rainbow gradients, or gratuitous visual effects",
+    "long copy, filler text, URLs, watermarks, or invented brand marks"
+  ]
+}
