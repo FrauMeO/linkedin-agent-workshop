@@ -79,6 +79,11 @@
   .chip { font: 500 0.72rem/1 var(--font-body); padding: 4px 8px; border-radius: 999px; }
   .chip.outside { background: var(--warn-wash); color: var(--warn); }
   .chip.joint { background: var(--joint-wash); color: var(--joint); }
+  .chip.src { background: var(--accent-wash); color: var(--accent); }
+  .advice { max-width: 62ch; font-size: 0.88rem; border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; }
+  .advice b { font: 500 0.7rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); display: block; margin-bottom: 2px; }
+  .advice small { display: block; color: var(--ink-soft); margin-top: 4px; }
+  .caution { max-width: 62ch; font-size: 0.88rem; background: var(--warn-wash); color: var(--warn); border-radius: 4px; padding: 8px 12px; }
   .chip.state { margin-left: auto; background: var(--rule); color: var(--ink-soft); }
   .q[data-state="answered"] .chip.state { background: var(--ok-wash); color: var(--ok); }
   .q[data-state="discuss"] .chip.state { background: var(--joint-wash); color: var(--joint); }
@@ -125,6 +130,7 @@
       <button type="button" data-f="answered" aria-pressed="false">Answered</button>
       <button type="button" data-f="outside" aria-pressed="false">Needs outside review</button>
       <button type="button" data-f="joint" aria-pressed="false">Joint with Miah</button>
+      <button type="button" data-f="advice" aria-pressed="false">New from the advice</button>
     </div>
     <div class="savestate" id="savestate" role="status" aria-live="polite"></div>
   </div>
@@ -207,9 +213,12 @@ function build() {
       const head = el("div", { class: "qhead" }, el("span", { class: "qid", text: q.id }));
       if (q.tag === "outside") head.append(el("span", { class: "chip outside", text: "Needs outside review" }));
       if (q.tag === "joint") head.append(el("span", { class: "chip joint", text: "Joint with Miah" }));
+      if (q.source) head.append(el("span", { class: "chip src", text: DATA.sources[q.source].label }));
       r.chip = el("span", { class: "chip state", text: "Open" });
       head.append(r.chip);
       const body = [head, el("h3", { text: q.title }), el("p", { class: "prompt", text: q.prompt }), el("p", { class: "why", text: q.why })];
+      if (q.advice) body.push(el("div", { class: "advice" }, el("b", { text: "What the advice says" }), el("span", { text: q.advice }), el("small", { text: DATA.sources[q.source].detail + (q.sourceRef ? " Reference: " + q.sourceRef + "." : "") })));
+      if (q.caution) body.push(el("p", { class: "caution", text: q.caution }));
       if (q.fields) {
         const grid = el("div", { class: "fields" });
         for (const f of q.fields) {
@@ -257,7 +266,7 @@ function refreshAll() {
   $("#fill").style.width = (100 * done / allQs.length) + "%";
   for (const q of allQs) {
     const r = els[q.id], st = r.root.dataset.state;
-    const show = filter === "all" || (filter === "open" && st !== "answered") || (filter === "answered" && st === "answered") || (filter === "outside" && q.tag === "outside") || (filter === "joint" && q.tag === "joint");
+    const show = filter === "all" || (filter === "open" && st !== "answered") || (filter === "answered" && st === "answered") || (filter === "outside" && q.tag === "outside") || (filter === "joint" && q.tag === "joint") || (filter === "advice" && !!q.source);
     r.root.hidden = !show;
   }
 }
