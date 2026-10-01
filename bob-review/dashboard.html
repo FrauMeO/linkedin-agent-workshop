@@ -1,0 +1,350 @@
+<title>Bob's Approval Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Layout: one narrow reading column, a sticky progress bar, questions as ruled rows, approval block last. */
+  :root {
+    --bg: #f3f5f6;
+    --surface: #ffffff;
+    --ink: #17232b;
+    --ink-soft: #52626c;
+    --rule: #d5dde1;
+    --accent: #0d6b6e;
+    --accent-ink: #ffffff;
+    --accent-wash: #e1f1f1;
+    --ok: #1f7a3d;
+    --ok-wash: #e1f3e6;
+    --warn: #9a5b00;
+    --warn-wash: #fbefd5;
+    --joint: #5b4a9e;
+    --joint-wash: #ebe7f7;
+    --focus: #0b57d0;
+    --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-head: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f171c; --surface: #17232b; --ink: #e8eef1; --ink-soft: #9fb0ba; --rule: #2a3a44;
+      --accent: #5cc4c0; --accent-ink: #0b1a1c; --accent-wash: #15393a;
+      --ok: #6fd18c; --ok-wash: #173524; --warn: #f0b35a; --warn-wash: #3b2c11;
+      --joint: #b4a5f0; --joint-wash: #2a2547; --focus: #8ab4ff; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f171c; --surface: #17232b; --ink: #e8eef1; --ink-soft: #9fb0ba; --rule: #2a3a44;
+    --accent: #5cc4c0; --accent-ink: #0b1a1c; --accent-wash: #15393a;
+    --ok: #6fd18c; --ok-wash: #173524; --warn: #f0b35a; --warn-wash: #3b2c11;
+    --joint: #b4a5f0; --joint-wash: #2a2547; --focus: #8ab4ff; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--font-body); margin: 0; padding-inline: 16px; padding-block: 0 64px; }
+  .wrap { max-width: 760px; margin-inline: auto; }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.2; }
+  h1 { font-size: 1.9rem; }
+  h2 { font-size: 1.3rem; }
+  h3 { font-size: 1.05rem; font-weight: 500; }
+  p { margin: 0; }
+  .eyebrow { font: 500 0.72rem/1 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  header.top { padding-block: 28px 18px; display: grid; gap: 10px; }
+  header.top p { color: var(--ink-soft); max-width: 62ch; }
+
+  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--rule); padding-block: 10px; display: grid; gap: 8px; }
+  .meter { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+  .track { height: 8px; background: var(--rule); border-radius: 4px; overflow: hidden; }
+  .fill { height: 100%; width: 0; background: var(--accent); transition: width 0.25s ease; }
+  .count { font: 500 0.82rem var(--font-mono); font-variant-numeric: tabular-nums; }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; }
+  .filters button { font: 500 0.8rem var(--font-body); border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+  .filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .savestate { font: 400 0.78rem var(--font-mono); color: var(--ink-soft); min-height: 1.2em; }
+  .savestate.err { color: var(--warn); }
+
+  .notice { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 14px 16px; margin-block: 18px 0; display: grid; gap: 10px; }
+  .notice ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  .notice li { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; font-size: 0.9rem; }
+  .kind { font: 500 0.68rem/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 6px; border-radius: 3px; background: var(--accent-wash); color: var(--accent); white-space: nowrap; }
+  .kind.changed, .kind.added { background: var(--warn-wash); color: var(--warn); }
+  .kind.unchecked { background: var(--rule); color: var(--ink-soft); }
+  .ro { background: var(--warn-wash); color: var(--warn); border-radius: 6px; padding: 10px 14px; margin-top: 14px; }
+
+  section.group { margin-top: 36px; display: grid; gap: 4px; }
+  section.group > p.blurb { color: var(--ink-soft); margin-bottom: 8px; max-width: 62ch; }
+  .q { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 16px; margin-top: 10px; display: grid; gap: 12px; min-width: 0; }
+  .q[hidden] { display: none; }
+  .qhead { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
+  .qid { font: 500 0.8rem var(--font-mono); background: var(--bg); border: 1px solid var(--rule); padding: 2px 7px; border-radius: 3px; }
+  .chip { font: 500 0.72rem/1 var(--font-body); padding: 4px 8px; border-radius: 999px; }
+  .chip.outside { background: var(--warn-wash); color: var(--warn); }
+  .chip.joint { background: var(--joint-wash); color: var(--joint); }
+  .chip.state { margin-left: auto; background: var(--rule); color: var(--ink-soft); }
+  .q[data-state="answered"] .chip.state { background: var(--ok-wash); color: var(--ok); }
+  .q[data-state="discuss"] .chip.state { background: var(--joint-wash); color: var(--joint); }
+  .q[data-state="later"] .chip.state { background: var(--warn-wash); color: var(--warn); }
+  .prompt { max-width: 62ch; }
+  .why { color: var(--ink-soft); font-size: 0.88rem; max-width: 62ch; }
+  label.lbl { font: 500 0.78rem var(--font-body); color: var(--ink-soft); display: block; margin-bottom: 4px; }
+  textarea, input[type="text"], input[type="date"] { width: 100%; font: 400 0.95rem/1.45 var(--font-body); color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; padding: 9px 10px; }
+  textarea { min-height: 76px; resize: vertical; }
+  textarea:disabled, input:disabled { opacity: 0.6; }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+  details.more summary { cursor: pointer; font: 500 0.82rem var(--font-body); color: var(--accent); width: fit-content; }
+  details.more[open] summary { margin-bottom: 8px; }
+  .flags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .flags button { font: 500 0.8rem var(--font-body); background: transparent; color: var(--ink); border: 1px solid var(--rule); border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+  .flags button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-wash); color: var(--accent); }
+
+  .approval { margin-top: 44px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 20px 16px; display: grid; gap: 14px; }
+  .approval fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .approval legend { font: 500 0.8rem var(--font-body); color: var(--ink-soft); padding: 0; margin-bottom: 6px; }
+  .radio { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 4px; cursor: pointer; }
+  .radio input { margin-top: 4px; }
+  .sig { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+  @media (max-width: 480px) { .sig { grid-template-columns: 1fr; } }
+  .primary { font: 600 0.95rem var(--font-body); background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 4px; padding: 11px 18px; cursor: pointer; width: fit-content; }
+  .primary:disabled { opacity: 0.55; cursor: not-allowed; }
+  .secondary { font: 500 0.88rem var(--font-body); background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 9px 14px; cursor: pointer; width: fit-content; }
+  .recorded { color: var(--ok); font-weight: 500; }
+  footer { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: var(--ink-soft); font-size: 0.85rem; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Three-role strategy · version 1.1 · 1 October 2026</span>
+    <h1>Bob's Approval Desk</h1>
+    <p>Answer by number. Most answers take one sentence. Your answers save as you type, and Miah receives them. Nothing is published, sent, purchased or activated by anything on this page.</p>
+  </header>
+
+  <div class="bar" id="bar">
+    <div class="meter"><div class="track"><div class="fill" id="fill"></div></div><div class="count" id="count">0 of 0 answered</div></div>
+    <div class="filters" id="filters" role="group" aria-label="Filter questions">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="open" aria-pressed="false">Still open</button>
+      <button type="button" data-f="answered" aria-pressed="false">Answered</button>
+      <button type="button" data-f="outside" aria-pressed="false">Needs outside review</button>
+      <button type="button" data-f="joint" aria-pressed="false">Joint with Miah</button>
+    </div>
+    <div class="savestate" id="savestate" role="status" aria-live="polite"></div>
+  </div>
+
+  <div class="notice" id="scan">
+    <h2>What changed since the summary PDF</h2>
+    <ul id="scanlist"></ul>
+  </div>
+  <div class="ro" id="readonly" hidden>This view is read-only, so answers cannot be saved. Ask Miah for edit access.</div>
+
+  <main id="groups"></main>
+
+  <section class="approval" id="approval" aria-labelledby="ap-h">
+    <h2 id="ap-h">Your decision</h2>
+    <p>I have reviewed the version 1.1 three-role strategy package summarized here.</p>
+    <fieldset>
+      <legend>My decision</legend>
+      <label class="radio"><input type="radio" name="decision" value="approve"><span><strong>Approve as written.</strong> Miah may proceed once the open questions above are answered.</span></label>
+      <label class="radio"><input type="radio" name="decision" value="approve-changes"><span><strong>Approve with changes</strong> listed below.</span></label>
+      <label class="radio"><input type="radio" name="decision" value="hold"><span><strong>Hold.</strong> Nothing proceeds until we discuss the package.</span></label>
+    </fieldset>
+    <div><label class="lbl" for="conditions">Changes or conditions</label><textarea id="conditions"></textarea></div>
+    <div class="sig">
+      <div><label class="lbl" for="signname">Bob Olmsted, approver</label><input type="text" id="signname" autocomplete="name"></div>
+      <div><label class="lbl" for="signdate">Date</label><input type="date" id="signdate"></div>
+    </div>
+    <div><label class="lbl" for="general">Anything else Miah should know</label><textarea id="general"></textarea></div>
+    <button type="button" class="primary" id="record">Record my decision</button>
+    <p id="recorded" class="recorded" hidden></p>
+  </section>
+
+  <footer>
+    <button type="button" class="secondary" id="export">Save a copy of my answers</button>
+    <span>A backup file you can send to Miah if the page cannot save.</span>
+  </footer>
+</div>
+
+<script>
+const DATA = {"title":"Three-role strategy approval","version":"1.1","asOf":"2026-10-01","source":"Bob_Strategy_Approval_Summary.pdf (compiled 1 Oct 2026 from Box: Cowork_Starter_Bob_Strategy)","scanUpdates":[{"kind":"changed","ref":"JS-4","text":"The summary names MASTER_W2_v24 and MASTER_CONSULTING_v22 as the current resume masters. Box also holds MASTER_W2_v25 (dated 2026-07-20) and MASTER_CONSULTING_v23 (dated 2026-07-20). Both are newer than the versions the summary names. Please confirm which pair is current."},{"kind":"added","ref":"NAME","text":"A 29 Sep working note records that the July plan placed the firm under Impact Arts Society LLC (Delaware), trading as \"Olmsted Data Advisory Group\". The 29 Sep confirmation says \"Olmsted Data Advisory\", without \"Group\". The same note finds no record assigning either name to a legal entity or a Washington filing."},{"kind":"confirmed","ref":"Site","text":"rbolmsted.com is on record as registered 2026-09-23 through Cloudflare on a five-year term. This matches the summary."},{"kind":"unchecked","ref":"Answers","text":"The scan did not read the records that could answer the 18 questions and 4 job-search items below. They are all treated as open."}],"sections":[{"id":"facts","title":"Facts only you can supply","blurb":"Figures and dates from your own records. The strategy holds labeled placeholders in their place, and nothing was invented.","questions":[{"id":"Q-01","title":"Current audience and pipeline counts","prompt":"What are your current LinkedIn followers, email contacts, newsletter subscribers and pipeline counts?","why":"Real numbers replace the labeled starting-state scenarios in the funnel math.","fields":[{"key":"linkedin_followers","label":"LinkedIn followers"},{"key":"email_contacts","label":"Email contacts"},{"key":"newsletter_subscribers","label":"Newsletter subscribers"},{"key":"pipeline","label":"Pipeline (prospects or open conversations)"}]},{"id":"Q-03","title":"Recent contract and consulting rates","prompt":"What have your recent contract and consulting rates been?","why":"The revenue scenarios need a real rate range."},{"id":"Q-05","title":"Weekly hours after a job","prompt":"Do your 15 to 20 weekly hours continue after you take a job?","why":"The employment-transition scenario cannot resolve without this answer."},{"id":"Q-09","title":"LinkedIn newsletter status","prompt":"What is your LinkedIn newsletter eligibility, Creator Mode status and subscriber notification setting?","why":"It decides whether a LinkedIn newsletter is available alongside the main newsletter."},{"id":"Q-10","title":"Engagement-count convention","prompt":"Which engagement-count convention do you want to use in public?","why":"Public claims need one counting rule that stays the same across posts."},{"id":"Q-11","title":"The Lam validation protocol","prompt":"Did you design the Lam validation protocol, or teach and refine an existing one?","why":"The answer shapes the wording, although this claim sits behind the round-one exclusion either way."},{"id":"Q-12","title":"DAMA CDMP exam scores and dates","prompt":"What was your exact score on each DAMA CDMP exam, and on what date?","why":"The register holds no verified scores or dates yet."},{"id":"Q-15","title":"BackOffice no-code classes","prompt":"What were the dates and course names for your BackOffice no-code classes?","why":"No pass-rate claim will appear until a record supports it."}]},{"id":"permissions","title":"Permissions and clearances","blurb":"Two of these need an outside reviewer. Reading an agreement yourself does not equal advice on it.","questions":[{"id":"Q-04","tag":"outside","title":"Accenture and Lam agreement limits","prompt":"Do your Accenture or Lam agreements restrict publicity, client references, non-solicitation, or use of engagement figures?","why":"The whole round-one exclusion guards against this risk."},{"id":"Q-19","tag":"outside","title":"Employer outside-activity policy","prompt":"Does any prospective employer's written outside-activity policy permit consulting, a paid newsletter and public commentary?","why":"Employment is an equal fourth objective. If a policy forbids the other three, the plan changes shape."},{"id":"Q-13","title":"Names of organizations and quote permission","prompt":"Confirm the correct names of the organizations recalled, and say whether anyone will give written permission to be quoted.","why":"Recalled so far: Lam, Dow, Purdue, Chevron, and one name lost to a transcription error. None are quoted or treated as testimonials."},{"id":"Q-23","title":"Scope of the round-one exclusion","prompt":"Does the round-one exclusion also cover private consulting conversations and job interviews?","why":"The working assumption is no, meaning published content only. Sales and interview scripts depend on your answer."},{"id":"Q-20","title":"Agency case-study permission","prompt":"Will you give Miah written permission to present the operating system and selected assets as an agency case study?","why":"This permission is separate from the work itself and has not been granted."}]},{"id":"joint","title":"Decide together with Miah","blurb":"Add your view here. Miah reads it before the two of you settle each item.","questions":[{"id":"NAME","tag":"joint","title":"Firm name","prompt":"Which firm name do you want? On 13 September you said you did not want the family surname in the firm name and left naming to Miah. On 29 September she confirmed \"Olmsted Data Advisory\".","why":"The two records conflict, so please agree on one. The 29 September working note also lists the July plan name as \"Olmsted Data Advisory Group\", under Impact Arts Society LLC."},{"id":"Q-08","tag":"joint","title":"Newsletter brand name","prompt":"Which newsletter brand name do you choose? \"The Sign-Off\" is a proposal, not a decision. The name, domain and handles still need an availability check.","why":"Nothing is published or purchased under the name until you decide."},{"id":"Q-22","tag":"joint","title":"What covers Miah's pay in months 1 to 3","prompt":"What covers Miah's pay in months 1 to 3, before business revenue can?","why":"Her requirement is $4,000 to $6,000 a month. The six-month target is $5,000 to $10,000 combined gross, including your employment income. Internal transfers are not double-counted."},{"id":"Q-21","tag":"joint","title":"Is the monthly figure before or after tax?","prompt":"Is the $4,000 to $6,000 figure before or after tax?","why":"It has no owner yet, and it changes the revenue math."},{"id":"Q-24","tag":"joint","title":"When round two begins","prompt":"When does round two begin, and what would justify seeking clearance to reference recent engagements?","why":"It has no owner yet."}]},{"id":"jobsearch","title":"Your job-search files","blurb":"Open since July. Record what you did, or what is blocking you.","questions":[{"id":"JS-1","title":"Client Experience Application","prompt":"Fill in the Client Experience Application before Miah's review gate. It overlaps the Engagement History One-Pager, which awaits approval, so the two need reconciling.","why":"Miah's review gate waits on it."},{"id":"JS-2","title":"Lyra Health VP resume variant","prompt":"Verify the Lyra Health VP standalone resume variant. What did you find?","why":"Open since July."},{"id":"JS-3","title":"Fujitsu portal resume","prompt":"Which resume did the Fujitsu portal actually receive?","why":"Open since July."},{"id":"JS-4","title":"Resume masters in use","prompt":"Which resume masters are current? The summary says nine custom resumes and the cover letters use version 21, and names MASTER_W2_v24 and MASTER_CONSULTING_v22 as the masters. A 1 Oct scan of Box also found MASTER_W2_v25 and MASTER_CONSULTING_v23. Miah decides on a refresh, but it affects anything you send next.","why":"It affects anything you send next."}]}]};
+const state = { answers: {}, approval: null, general: null, canWrite: true };
+const els = {}; // id -> element refs
+const timers = {};
+const chains = {};
+let db = null, filter = "all";
+
+const $ = (s) => document.querySelector(s);
+const el = (tag, props = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") n.className = v; else if (k === "text") n.textContent = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+  }
+  for (const c of kids) if (c) n.append(c);
+  return n;
+};
+const allQs = DATA.sections.flatMap((s) => s.questions);
+const STATE_LABEL = { open: "Open", answered: "Answered", discuss: "Discuss with Miah", later: "Come back later" };
+
+function setSave(msg, err) { const s = $("#savestate"); s.textContent = msg; s.classList.toggle("err", !!err); }
+
+function derive(q, a) {
+  if (a.flag) return a.flag;
+  const hasField = q.fields && Object.values(a.fields || {}).some((v) => (v || "").trim());
+  return ((a.text || "").trim() || hasField) ? "answered" : "open";
+}
+function localAnswer(q) {
+  const r = els[q.id];
+  const fields = {};
+  if (q.fields) for (const f of q.fields) fields[f.key] = r.fieldInputs[f.key].value;
+  return { text: r.text ? r.text.value : "", fields, notes: r.notes.value, flag: r.flag || "" };
+}
+
+function build() {
+  $("#scanlist").append(...DATA.scanUpdates.map((u) => el("li", {}, el("span", { class: "kind " + u.kind, text: u.kind === "unchecked" ? "not checked" : u.kind }), el("span", { text: (u.ref !== "Answers" && u.ref !== "Site" ? u.ref + ": " : "") + u.text }))));
+  const root = $("#groups");
+  for (const sec of DATA.sections) {
+    const g = el("section", { class: "group" }, el("h2", { text: sec.title }), el("p", { class: "blurb", text: sec.blurb }));
+    for (const q of sec.questions) {
+      const r = { fieldInputs: {}, flag: "" };
+      const head = el("div", { class: "qhead" }, el("span", { class: "qid", text: q.id }));
+      if (q.tag === "outside") head.append(el("span", { class: "chip outside", text: "Needs outside review" }));
+      if (q.tag === "joint") head.append(el("span", { class: "chip joint", text: "Joint with Miah" }));
+      r.chip = el("span", { class: "chip state", text: "Open" });
+      head.append(r.chip);
+      const body = [head, el("h3", { text: q.title }), el("p", { class: "prompt", text: q.prompt }), el("p", { class: "why", text: q.why })];
+      if (q.fields) {
+        const grid = el("div", { class: "fields" });
+        for (const f of q.fields) {
+          const inp = el("input", { type: "text", id: `${q.id}-${f.key}`, inputmode: "numeric" });
+          inp.addEventListener("input", () => touch(q));
+          r.fieldInputs[f.key] = inp;
+          grid.append(el("div", {}, el("label", { class: "lbl", for: inp.id, text: f.label }), inp));
+        }
+        body.push(grid);
+      } else {
+        r.text = el("textarea", { id: `${q.id}-answer` });
+        r.text.addEventListener("input", () => touch(q));
+        body.push(el("div", {}, el("label", { class: "lbl", for: r.text.id, text: "Your answer" }), r.text));
+      }
+      r.notes = el("textarea", { id: `${q.id}-notes` });
+      r.notes.addEventListener("input", () => touch(q));
+      body.push(el("details", { class: "more" }, el("summary", { text: "Add more information" }), el("label", { class: "lbl", for: r.notes.id, text: "Additional information" }), r.notes));
+      r.later = el("button", { type: "button", "aria-pressed": "false", text: "Come back later" });
+      r.discuss = el("button", { type: "button", "aria-pressed": "false", text: "Discuss with Miah" });
+      for (const [btn, val] of [[r.later, "later"], [r.discuss, "discuss"]]) {
+        btn.addEventListener("click", () => { r.flag = r.flag === val ? "" : val; touch(q); });
+      }
+      body.push(el("div", { class: "flags" }, r.later, r.discuss));
+      r.root = el("article", { class: "q", "data-state": "open", id: "q-" + q.id }, ...body);
+      r.root.dataset.tag = q.tag || "";
+      els[q.id] = r;
+      g.append(r.root);
+    }
+    root.append(g);
+  }
+}
+
+function refresh(q) {
+  const r = els[q.id], a = localAnswer(q), st = derive(q, a);
+  r.root.dataset.state = st;
+  r.chip.textContent = STATE_LABEL[st];
+  r.later.setAttribute("aria-pressed", String(r.flag === "later"));
+  r.discuss.setAttribute("aria-pressed", String(r.flag === "discuss"));
+  return st;
+}
+function refreshAll() {
+  let done = 0;
+  for (const q of allQs) if (refresh(q) === "answered") done++;
+  $("#count").textContent = `${done} of ${allQs.length} answered`;
+  $("#fill").style.width = (100 * done / allQs.length) + "%";
+  for (const q of allQs) {
+    const r = els[q.id], st = r.root.dataset.state;
+    const show = filter === "all" || (filter === "open" && st !== "answered") || (filter === "answered" && st === "answered") || (filter === "outside" && q.tag === "outside") || (filter === "joint" && q.tag === "joint");
+    r.root.hidden = !show;
+  }
+}
+
+function touch(q) {
+  r_dirty(q.id);
+  refreshAll();
+  if (!state.canWrite) return;
+  setSave("Saving…");
+  clearTimeout(timers[q.id]);
+  timers[q.id] = setTimeout(() => saveAnswer(q), 700);
+}
+const dirty = new Set();
+function r_dirty(id) { dirty.add(id); }
+
+function enqueue(path, data) {
+  chains[path] = (chains[path] || Promise.resolve()).then(() => db.doc(path).set(data)).then(() => setSave("Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })), (e) => { setSave("Could not save: " + (e && e.message || e.code || "unknown error") + ". Use “Save a copy of my answers”.", true); });
+  return chains[path];
+}
+function saveAnswer(q) {
+  if (!db) { setSave("Not connected, so nothing was saved. Use “Save a copy of my answers”.", true); return; }
+  const a = localAnswer(q);
+  enqueue("answers/" + q.id, { id: q.id, title: q.title, status: derive(q, a), text: a.text, fields: a.fields, notes: a.notes, flag: a.flag, updatedAt: new Date().toISOString() })
+    .then(() => dirty.delete(q.id));
+}
+
+function applyRemote(id, d) {
+  const q = allQs.find((x) => x.id === id); if (!q || dirty.has(id)) return;
+  const r = els[id];
+  if (r.text && document.activeElement !== r.text) r.text.value = d.text || "";
+  if (q.fields) for (const f of q.fields) if (document.activeElement !== r.fieldInputs[f.key]) r.fieldInputs[f.key].value = (d.fields || {})[f.key] || "";
+  if (document.activeElement !== r.notes) r.notes.value = d.notes || "";
+  r.flag = d.flag || "";
+}
+
+function setApproval(d) {
+  if (!d) return;
+  const rad = document.querySelector(`input[name="decision"][value="${d.decision}"]`); if (rad) rad.checked = true;
+  for (const [id, k] of [["conditions", "conditions"], ["signname", "signedName"], ["signdate", "date"]]) if (document.activeElement !== $("#" + id)) $("#" + id).value = d[k] || "";
+  if (d.recordedAt) { const p = $("#recorded"); p.hidden = false; p.textContent = "Decision recorded " + new Date(d.recordedAt).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) + ". Miah has been given your decision."; }
+}
+
+function bind() {
+  $("#filters").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-f]"); if (!b) return;
+    filter = b.dataset.f;
+    for (const x of $("#filters").children) x.setAttribute("aria-pressed", String(x === b));
+    refreshAll();
+  });
+  $("#record").addEventListener("click", async () => {
+    const decision = (document.querySelector('input[name="decision"]:checked') || {}).value;
+    if (!decision) { setSave("Choose a decision first.", true); return; }
+    if (!$("#signname").value.trim()) { setSave("Type your name to sign.", true); return; }
+    if (!$("#signdate").value) $("#signdate").value = new Date().toISOString().slice(0, 10);
+    const rec = { decision, conditions: $("#conditions").value, signedName: $("#signname").value.trim(), date: $("#signdate").value, recordedAt: new Date().toISOString() };
+    if (!db) { setSave("Not connected, so nothing was saved.", true); return; }
+    await enqueue("meta/approval", rec);
+    setApproval(rec);
+  });
+  let gt; $("#general").addEventListener("input", () => { if (!db || !state.canWrite) return; setSave("Saving…"); clearTimeout(gt); gt = setTimeout(() => enqueue("meta/general", { notes: $("#general").value, updatedAt: new Date().toISOString() }), 700); });
+  for (const id of ["conditions", "signname", "signdate"]) $("#" + id).addEventListener("change", () => {
+    if (!db || !state.canWrite) return;
+    const decision = (document.querySelector('input[name="decision"]:checked') || {}).value || "";
+    if (state.approval && state.approval.recordedAt) return; // keep the recorded decision until Bob records again
+    enqueue("meta/approval_draft", { decision, conditions: $("#conditions").value, signedName: $("#signname").value, date: $("#signdate").value, updatedAt: new Date().toISOString() });
+  });
+  $("#export").addEventListener("click", async () => {
+    const dl = await claude.use("downloads").catch(() => null);
+    const out = { exportedAt: new Date().toISOString(), version: DATA.version, answers: {}, approval: state.approval, general: $("#general").value };
+    for (const q of allQs) { const a = localAnswer(q); out.answers[q.id] = { id: q.id, title: q.title, status: derive(q, a), text: a.text, fields: a.fields, notes: a.notes, flag: a.flag }; }
+    if (!dl) { setSave("Saving files is not available in this view.", true); return; }
+    try { await dl.save({ filename: "bob-answers-" + new Date().toISOString().slice(0, 10) + ".json", data: JSON.stringify(out, null, 2) }); } catch (e) { setSave("Save was cancelled.", true); }
+  });
+}
+
+async function connect() {
+  const user = await claude.use("user").catch(() => null);
+  if (user && typeof user.can === "function") { const c = user.can("data.write"); if (c === false) { state.canWrite = false; $("#readonly").hidden = false; for (const t of document.querySelectorAll("textarea,input,.flags button,#record")) t.disabled = true; } }
+  db = await claude.use("db").catch(() => null);
+  if (!db) { setSave("Not connected: answers on this page will not be saved. Use “Save a copy of my answers”.", true); return; }
+  db.collection("answers").onSnapshot((snap) => {
+    for (const d of snap.docs) { state.answers[d.id] = d.data(); applyRemote(d.id, d.data()); }
+    refreshAll();
+  }, (e) => setSave("Live connection lost: " + (e.message || e.code), true));
+  db.doc("meta/approval").onSnapshot((s) => { if (s.exists) { state.approval = s.data(); setApproval(s.data()); } });
+  db.doc("meta/general").onSnapshot((s) => { if (s.exists && document.activeElement !== $("#general")) $("#general").value = s.data().notes || ""; });
+}
+
+build(); bind(); refreshAll(); connect();
+</script>

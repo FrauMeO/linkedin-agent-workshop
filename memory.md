@@ -4,6 +4,13 @@ Running log of decisions made in this project, newest first. Append only — see
 
 ---
 
+## 2026-10-01
+
+- **Bob's approval dashboard built in `bob-review/`**, separate from the post pipeline. Bob answers 18 questions and 4 job-search items from the 1 Oct approval summary and records his decision; answers save to a claude.ai Artifact's shared database and are copied into `bob-review/answers.json` and `answers.md` by `import-answers.mjs`. Why a hosted artifact and not the local `app/` server: Bob cannot reach a server running on this machine. Trade-off: import is a step Claude runs on request, not continuous.
+- **Scan updates applied to the summary content** (shown on the dashboard, source PDF untouched): Box holds MASTER_W2_v25 and MASTER_CONSULTING_v23, newer than the v24 and v22 the PDF names; the 29 Sep note lists the July firm name as "Olmsted Data Advisory Group" under Impact Arts Society LLC, with no entity assignment on record. The scan did not read records that could answer any question, so all stay open.
+- **`toolkit_inventory.md` counts re-checked** against the live site (125 entries, 31 categories, unchanged). Prices were not re-verified.
+- **iMessage notification not possible from this environment.** No messaging tool is available here.
+
 ## 2026-08-25
 
 - **AGENTS.md capped at ~200 lines and kept pointer-only.** It states goal/inputs/outputs/rules and links to `business-context.md`, `naming-rules.md`, `memory.md`, `sessions/`. Substantive content lives in those files, not inline in AGENTS.md. Why: keeps the orchestrator scannable as the project grows instead of becoming a dumping ground.

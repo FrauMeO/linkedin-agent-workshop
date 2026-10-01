@@ -1,0 +1,203 @@
+{
+  "title": "Three-role strategy approval",
+  "version": "1.1",
+  "asOf": "2026-10-01",
+  "source": "Bob_Strategy_Approval_Summary.pdf (compiled 1 Oct 2026 from Box: Cowork_Starter_Bob_Strategy)",
+  "scanUpdates": [
+    {
+      "kind": "changed",
+      "ref": "JS-4",
+      "text": "The summary names MASTER_W2_v24 and MASTER_CONSULTING_v22 as the current resume masters. Box also holds MASTER_W2_v25 (dated 2026-07-20) and MASTER_CONSULTING_v23 (dated 2026-07-20). Both are newer than the versions the summary names. Please confirm which pair is current."
+    },
+    {
+      "kind": "added",
+      "ref": "NAME",
+      "text": "A 29 Sep working note records that the July plan placed the firm under Impact Arts Society LLC (Delaware), trading as \"Olmsted Data Advisory Group\". The 29 Sep confirmation says \"Olmsted Data Advisory\", without \"Group\". The same note finds no record assigning either name to a legal entity or a Washington filing."
+    },
+    {
+      "kind": "confirmed",
+      "ref": "Site",
+      "text": "rbolmsted.com is on record as registered 2026-09-23 through Cloudflare on a five-year term. This matches the summary."
+    },
+    {
+      "kind": "unchecked",
+      "ref": "Answers",
+      "text": "The scan did not read the records that could answer the 18 questions and 4 job-search items below. They are all treated as open."
+    }
+  ],
+  "sections": [
+    {
+      "id": "facts",
+      "title": "Facts only you can supply",
+      "blurb": "Figures and dates from your own records. The strategy holds labeled placeholders in their place, and nothing was invented.",
+      "questions": [
+        {
+          "id": "Q-01",
+          "title": "Current audience and pipeline counts",
+          "prompt": "What are your current LinkedIn followers, email contacts, newsletter subscribers and pipeline counts?",
+          "why": "Real numbers replace the labeled starting-state scenarios in the funnel math.",
+          "fields": [
+            { "key": "linkedin_followers", "label": "LinkedIn followers" },
+            { "key": "email_contacts", "label": "Email contacts" },
+            { "key": "newsletter_subscribers", "label": "Newsletter subscribers" },
+            { "key": "pipeline", "label": "Pipeline (prospects or open conversations)" }
+          ]
+        },
+        {
+          "id": "Q-03",
+          "title": "Recent contract and consulting rates",
+          "prompt": "What have your recent contract and consulting rates been?",
+          "why": "The revenue scenarios need a real rate range."
+        },
+        {
+          "id": "Q-05",
+          "title": "Weekly hours after a job",
+          "prompt": "Do your 15 to 20 weekly hours continue after you take a job?",
+          "why": "The employment-transition scenario cannot resolve without this answer."
+        },
+        {
+          "id": "Q-09",
+          "title": "LinkedIn newsletter status",
+          "prompt": "What is your LinkedIn newsletter eligibility, Creator Mode status and subscriber notification setting?",
+          "why": "It decides whether a LinkedIn newsletter is available alongside the main newsletter."
+        },
+        {
+          "id": "Q-10",
+          "title": "Engagement-count convention",
+          "prompt": "Which engagement-count convention do you want to use in public?",
+          "why": "Public claims need one counting rule that stays the same across posts."
+        },
+        {
+          "id": "Q-11",
+          "title": "The Lam validation protocol",
+          "prompt": "Did you design the Lam validation protocol, or teach and refine an existing one?",
+          "why": "The answer shapes the wording, although this claim sits behind the round-one exclusion either way."
+        },
+        {
+          "id": "Q-12",
+          "title": "DAMA CDMP exam scores and dates",
+          "prompt": "What was your exact score on each DAMA CDMP exam, and on what date?",
+          "why": "The register holds no verified scores or dates yet."
+        },
+        {
+          "id": "Q-15",
+          "title": "BackOffice no-code classes",
+          "prompt": "What were the dates and course names for your BackOffice no-code classes?",
+          "why": "No pass-rate claim will appear until a record supports it."
+        }
+      ]
+    },
+    {
+      "id": "permissions",
+      "title": "Permissions and clearances",
+      "blurb": "Two of these need an outside reviewer. Reading an agreement yourself does not equal advice on it.",
+      "questions": [
+        {
+          "id": "Q-04",
+          "tag": "outside",
+          "title": "Accenture and Lam agreement limits",
+          "prompt": "Do your Accenture or Lam agreements restrict publicity, client references, non-solicitation, or use of engagement figures?",
+          "why": "The whole round-one exclusion guards against this risk."
+        },
+        {
+          "id": "Q-19",
+          "tag": "outside",
+          "title": "Employer outside-activity policy",
+          "prompt": "Does any prospective employer's written outside-activity policy permit consulting, a paid newsletter and public commentary?",
+          "why": "Employment is an equal fourth objective. If a policy forbids the other three, the plan changes shape."
+        },
+        {
+          "id": "Q-13",
+          "title": "Names of organizations and quote permission",
+          "prompt": "Confirm the correct names of the organizations recalled, and say whether anyone will give written permission to be quoted.",
+          "why": "Recalled so far: Lam, Dow, Purdue, Chevron, and one name lost to a transcription error. None are quoted or treated as testimonials."
+        },
+        {
+          "id": "Q-23",
+          "title": "Scope of the round-one exclusion",
+          "prompt": "Does the round-one exclusion also cover private consulting conversations and job interviews?",
+          "why": "The working assumption is no, meaning published content only. Sales and interview scripts depend on your answer."
+        },
+        {
+          "id": "Q-20",
+          "title": "Agency case-study permission",
+          "prompt": "Will you give Miah written permission to present the operating system and selected assets as an agency case study?",
+          "why": "This permission is separate from the work itself and has not been granted."
+        }
+      ]
+    },
+    {
+      "id": "joint",
+      "title": "Decide together with Miah",
+      "blurb": "Add your view here. Miah reads it before the two of you settle each item.",
+      "questions": [
+        {
+          "id": "NAME",
+          "tag": "joint",
+          "title": "Firm name",
+          "prompt": "Which firm name do you want? On 13 September you said you did not want the family surname in the firm name and left naming to Miah. On 29 September she confirmed \"Olmsted Data Advisory\".",
+          "why": "The two records conflict, so please agree on one. The 29 September working note also lists the July plan name as \"Olmsted Data Advisory Group\", under Impact Arts Society LLC."
+        },
+        {
+          "id": "Q-08",
+          "tag": "joint",
+          "title": "Newsletter brand name",
+          "prompt": "Which newsletter brand name do you choose? \"The Sign-Off\" is a proposal, not a decision. The name, domain and handles still need an availability check.",
+          "why": "Nothing is published or purchased under the name until you decide."
+        },
+        {
+          "id": "Q-22",
+          "tag": "joint",
+          "title": "What covers Miah's pay in months 1 to 3",
+          "prompt": "What covers Miah's pay in months 1 to 3, before business revenue can?",
+          "why": "Her requirement is $4,000 to $6,000 a month. The six-month target is $5,000 to $10,000 combined gross, including your employment income. Internal transfers are not double-counted."
+        },
+        {
+          "id": "Q-21",
+          "tag": "joint",
+          "title": "Is the monthly figure before or after tax?",
+          "prompt": "Is the $4,000 to $6,000 figure before or after tax?",
+          "why": "It has no owner yet, and it changes the revenue math."
+        },
+        {
+          "id": "Q-24",
+          "tag": "joint",
+          "title": "When round two begins",
+          "prompt": "When does round two begin, and what would justify seeking clearance to reference recent engagements?",
+          "why": "It has no owner yet."
+        }
+      ]
+    },
+    {
+      "id": "jobsearch",
+      "title": "Your job-search files",
+      "blurb": "Open since July. Record what you did, or what is blocking you.",
+      "questions": [
+        {
+          "id": "JS-1",
+          "title": "Client Experience Application",
+          "prompt": "Fill in the Client Experience Application before Miah's review gate. It overlaps the Engagement History One-Pager, which awaits approval, so the two need reconciling.",
+          "why": "Miah's review gate waits on it."
+        },
+        {
+          "id": "JS-2",
+          "title": "Lyra Health VP resume variant",
+          "prompt": "Verify the Lyra Health VP standalone resume variant. What did you find?",
+          "why": "Open since July."
+        },
+        {
+          "id": "JS-3",
+          "title": "Fujitsu portal resume",
+          "prompt": "Which resume did the Fujitsu portal actually receive?",
+          "why": "Open since July."
+        },
+        {
+          "id": "JS-4",
+          "title": "Resume masters in use",
+          "prompt": "Which resume masters are current? The summary says nine custom resumes and the cover letters use version 21, and names MASTER_W2_v24 and MASTER_CONSULTING_v22 as the masters. A 1 Oct scan of Box also found MASTER_W2_v25 and MASTER_CONSULTING_v23. Miah decides on a refresh, but it affects anything you send next.",
+          "why": "It affects anything you send next."
+        }
+      ]
+    }
+  ]
+}
