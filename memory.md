@@ -23,3 +23,16 @@ Running log of decisions made in this project, newest first. Append only — see
 - **`business-context.md` created** with industry-researched ICPs (Design Engineer, Procurement Manager, Procurement/Manufacturing Engineer, OEM Product Manager), competitor landscape (marketplaces like Xometry/Protolabs/Fictiv/SendCutSend vs. local job shops), platform ranking (LinkedIn primary, YouTube secondary, Instagram narrow), and what post types perform well — for a sheet metal manufacturer client. Marked `[NEEDS INPUT]` where real business specifics (company name, processes offered, certifications, actual local competitors) are still missing — this is a researched starting frame, not a finished profile. `research` and `write-linkedin` skills were updated to read it.
 - **Three production-depth skills written**: `skills/research/SKILL.md`, `skills/write-linkedin/SKILL.md`, `skills/create-visual/SKILL.md`, modeled on the workshop-root `.agents/skills/` versions but scoped to this project's `posts/NNN-slug/` convention and business context.
 - **Visual system replaced with the editorial scale-play poster system.** It synthesizes the supplied references into a repeatable rule set: a single visual tension, oversized or unusually staged hero object, deliberate negative space, controlled studio palette, high-impact display typography, and a premium editorial finish. Five selectable archetypes (`scale-shift`, `hero-object`, `human-scale`, `framing-hands`, `surreal-collage`) make the system adaptable without losing consistency. The shared style guide, both image skills, and the local app's image-plan schema now use it. Why: the previous deadpan streetwear illustration rule was too narrow for varied post topics and did not reflect the reference set's photographic/editorial language.
+
+## 2026-10-09
+
+- **Box canon reconciled against Bob's Approval Desk.** The checklist, files-to-correct CSV and Astra handover are in Box "Bob Olmsted 2026". Biggest open conflicts:
+  - Q-11: designed or taught the Lam protocol.
+  - Q-10: 453 validations per cycle or in total; 24 engagements.
+  - Q-23: the 29 Sep lift of the round-one exclusion is not reflected on the desk.
+  - NAME/ENTITY: no entity can contract for Bob's consulting yet.
+  - JS-4: resume master of record.
+  - LI-6: LinkedIn changed outside the approval gate.
+  Why: many desk questions already had answers or contradictions in the files.
+- **Miah's 9 Oct statements override files:** Syniti spelling; no "Olmsted Data Advisory"; @transformingdata.llc → rbolmsted.com; Bob holds the shared Outskill courses.
+- **Backup quarantine stopped partway** (77/111 subfolders). Move only, never delete. See sessions/2026-10-09.md.
