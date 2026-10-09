@@ -4,6 +4,14 @@ Running log of decisions made in this project, newest first. Append only — see
 
 ---
 
+## 2026-10-01
+
+- **Dashboard extended with 14 questions from two supplied sources** (LinkedIn audit workshop transcript, 8 Oct 2025; Salesforce email guide). New sections: LinkedIn profile (LI-1 to LI-6), interviews (IV-1, IV-2), newsletter (EM-1 to EM-6); advice notes added to Q-01, Q-10 and JS-4. Each item names its source. Vendor prices, offers, success claims and statistics were left out. The workshop's advice to name well-known employers conflicts with the round-one exclusion, so LI-2 carries a caution. The re-uploaded approval PDF and inventory were byte-identical to the first uploads, so no further scan updates came from them.
+- **Bob's approval dashboard built in `bob-review/`**, separate from the post pipeline. Bob answers 18 questions and 4 job-search items from the 1 Oct approval summary and records his decision; answers save to a claude.ai Artifact's shared database and are copied into `bob-review/answers.json` and `answers.md` by `import-answers.mjs`. Why a hosted artifact and not the local `app/` server: Bob cannot reach a server running on this machine. Trade-off: import is a step Claude runs on request, not continuous.
+- **Scan updates applied to the summary content** (shown on the dashboard, source PDF untouched): Box holds MASTER_W2_v25 and MASTER_CONSULTING_v23, newer than the v24 and v22 the PDF names; the 29 Sep note lists the July firm name as "Olmsted Data Advisory Group" under Impact Arts Society LLC, with no entity assignment on record. The scan did not read records that could answer any question, so all stay open.
+- **`toolkit_inventory.md` counts re-checked** against the live site (125 entries, 31 categories, unchanged). Prices were not re-verified.
+- **iMessage notification not possible from this environment.** No messaging tool is available here.
+
 ## 2026-08-25
 
 - **AGENTS.md capped at ~200 lines and kept pointer-only.** It states goal/inputs/outputs/rules and links to `business-context.md`, `naming-rules.md`, `memory.md`, `sessions/`. Substantive content lives in those files, not inline in AGENTS.md. Why: keeps the orchestrator scannable as the project grows instead of becoming a dumping ground.
@@ -15,3 +23,16 @@ Running log of decisions made in this project, newest first. Append only — see
 - **`business-context.md` created** with industry-researched ICPs (Design Engineer, Procurement Manager, Procurement/Manufacturing Engineer, OEM Product Manager), competitor landscape (marketplaces like Xometry/Protolabs/Fictiv/SendCutSend vs. local job shops), platform ranking (LinkedIn primary, YouTube secondary, Instagram narrow), and what post types perform well — for a sheet metal manufacturer client. Marked `[NEEDS INPUT]` where real business specifics (company name, processes offered, certifications, actual local competitors) are still missing — this is a researched starting frame, not a finished profile. `research` and `write-linkedin` skills were updated to read it.
 - **Three production-depth skills written**: `skills/research/SKILL.md`, `skills/write-linkedin/SKILL.md`, `skills/create-visual/SKILL.md`, modeled on the workshop-root `.agents/skills/` versions but scoped to this project's `posts/NNN-slug/` convention and business context.
 - **Visual system replaced with the editorial scale-play poster system.** It synthesizes the supplied references into a repeatable rule set: a single visual tension, oversized or unusually staged hero object, deliberate negative space, controlled studio palette, high-impact display typography, and a premium editorial finish. Five selectable archetypes (`scale-shift`, `hero-object`, `human-scale`, `framing-hands`, `surreal-collage`) make the system adaptable without losing consistency. The shared style guide, both image skills, and the local app's image-plan schema now use it. Why: the previous deadpan streetwear illustration rule was too narrow for varied post topics and did not reflect the reference set's photographic/editorial language.
+
+## 2026-10-09
+
+- **Box canon reconciled against Bob's Approval Desk.** The checklist, files-to-correct CSV and Astra handover are in Box "Bob Olmsted 2026". Biggest open conflicts:
+  - Q-11: designed or taught the Lam protocol.
+  - Q-10: 453 validations per cycle or in total; 24 engagements.
+  - Q-23: the 29 Sep lift of the round-one exclusion is not reflected on the desk.
+  - NAME/ENTITY: no entity can contract for Bob's consulting yet.
+  - JS-4: resume master of record.
+  - LI-6: LinkedIn changed outside the approval gate.
+  Why: many desk questions already had answers or contradictions in the files.
+- **Miah's 9 Oct statements override files:** Syniti spelling; no "Olmsted Data Advisory"; @transformingdata.llc → rbolmsted.com; Bob holds the shared Outskill courses.
+- **Backup quarantine stopped partway** (77/111 subfolders). Move only, never delete. See sessions/2026-10-09.md.
