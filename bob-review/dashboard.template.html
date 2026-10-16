@@ -126,6 +126,8 @@
   .helpout.err { color: var(--warn); }
   .ynrow { display: grid; gap: 6px; }
   .ynrow .lbl { font-size: 0.88rem; line-height: 1.4; color: var(--ink); margin: 0; }
+  .ynnote[hidden] { display: none; }
+  .ynnote { display: grid; gap: 4px; }
   .ynbtns { display: flex; gap: 8px; }
   .yn { font: 600 0.9rem var(--font-body); min-width: 72px; padding: 8px 16px; border-radius: 4px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); cursor: pointer; }
   .yn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
@@ -213,9 +215,9 @@ const el = (tag, props = {}, ...kids) => {
 const allQs = DATA.sections.flatMap((s) => s.questions);
 for (const q of allQs) if (!q.fields && q.files && q.files.decide && q.files.decide.length > 1) {
   q._subs = true;
-  const yn = q.files.yesno || [];
+  const yn = q.files.yesno || [], yd = q.files.yesDetail || {};
   q.fields = q.files.decide.flatMap((d, i) => { const k = "abcdefgh"[i];
-    return yn.includes(k) ? [{ key: k, label: k + ". " + d, yn: true }, { key: k + "_note", label: "If no, what is right?", note: k }] : [{ key: k, label: k + ". " + d, long: true }]; });
+    return yn.includes(k) ? [{ key: k, label: k + ". " + d, yn: true, yesDetail: yd[k] || "" }, { key: k + "_note", label: "Details", note: k }] : [{ key: k, label: k + ". " + d, long: true }]; });
 }
 const FILE_LABEL = { "CONFLICT": "Files disagree", "PARTLY ANSWERED": "Partly answered", "ANSWERED BY CANON": "Answered in the files", "OPEN": "Not in the files" };
 const FILE_CLASS = { "CONFLICT": "conflict", "PARTLY ANSWERED": "partly", "ANSWERED BY CANON": "canon", "OPEN": "" };
@@ -293,13 +295,15 @@ function build() {
           if (f.note) continue;
           if (f.yn) {
             const val = el("input", { type: "hidden", id: `${q.id}-${f.key}` });
-            const note = el("input", { type: "text", id: `${q.id}-${f.key}_note`, placeholder: "If no, what is right? (optional)" });
+            const note = el("textarea", { id: `${q.id}-${f.key}_note`, rows: "2" });
+            const noteLbl = el("label", { class: "lbl", for: note.id });
             note.addEventListener("input", () => touch(q));
             const pick = (v) => { val.value = val.value === v ? "" : v; touch(q); };
             const yes = el("button", { type: "button", class: "yn", "aria-pressed": "false", text: "Yes", onclick: () => pick("Yes") });
             const no = el("button", { type: "button", class: "yn", "aria-pressed": "false", text: "No", onclick: () => pick("No") });
-            r.fieldInputs[f.key] = val; r.fieldInputs[f.key + "_note"] = note; r.yn[f.key] = { val, yes, no, note };
-            grid.append(el("div", { class: "ynrow" }, el("span", { class: "lbl", text: f.label }), el("div", { class: "ynbtns" }, yes, no), note));
+            const noteWrap = el("div", { class: "ynnote" }, noteLbl, note);
+            r.fieldInputs[f.key] = val; r.fieldInputs[f.key + "_note"] = note; r.yn[f.key] = { val, yes, no, note, noteWrap, noteLbl, yesDetail: f.yesDetail };
+            grid.append(el("div", { class: "ynrow" }, el("span", { class: "lbl", text: f.label }), el("div", { class: "ynbtns" }, yes, no), noteWrap));
             continue;
           }
           const inp = f.long ? el("textarea", { id: `${q.id}-${f.key}`, rows: "2" }) : el("input", { type: "text", id: `${q.id}-${f.key}`, inputmode: "numeric" });
@@ -347,7 +351,9 @@ function refresh(q) {
   r.chip.textContent = STATE_LABEL[st];
   r.later.setAttribute("aria-pressed", String(r.flag === "later"));
   r.discuss.setAttribute("aria-pressed", String(r.flag === "discuss"));
-  for (const y of Object.values(r.yn || {})) { y.yes.setAttribute("aria-pressed", String(y.val.value === "Yes")); y.no.setAttribute("aria-pressed", String(y.val.value === "No")); y.note.hidden = y.val.value !== "No" && !y.note.value.trim(); }
+  for (const y of Object.values(r.yn || {})) { y.yes.setAttribute("aria-pressed", String(y.val.value === "Yes")); y.no.setAttribute("aria-pressed", String(y.val.value === "No")); const v = y.val.value, open = v === "No" || (v === "Yes" && !!y.yesDetail) || (v === "" && !!y.note.value.trim());
+    y.noteWrap.hidden = !open;
+    y.noteLbl.textContent = v === "Yes" && y.yesDetail ? y.yesDetail : v === "Yes" ? "Details" : "If no, what is right?"; }
   return st;
 }
 function refreshAll() {

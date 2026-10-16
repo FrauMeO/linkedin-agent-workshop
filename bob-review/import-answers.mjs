@@ -49,7 +49,9 @@ for (const sec of questions.sections) {
     const yn = (q.files && q.files.yesno) || [];
     const subs = !q.fields && q.files && (q.files.decide || []).length > 1 ? q.files.decide.flatMap((d, i) => { const k = "abcdefgh"[i];
       const row = { key: k, label: k + ". " + d };
-      return yn.includes(k) && (a.fields || {})[k] === "No" ? [row, { key: k + "_note", label: `${k}. If no, what is right?` }] : [row]; }) : null;
+      const v = (a.fields || {})[k], yd = ((q.files && q.files.yesDetail) || {})[k];
+      if (!yn.includes(k) || !(a.fields || {})[k + "_note"]) return [row];
+      return [row, { key: k + "_note", label: `${k}. ${v === "Yes" && yd ? yd : v === "No" ? "If no, what is right?" : "Details"}` }]; }) : null;
     for (const f of q.fields || subs || []) if ((a.fields || {})[f.key]) lines.push(`- ${f.label}: ${a.fields[f.key]}`);
     if (a.text) lines.push(`- Answer: ${a.text.replace(/\n/g, "\n  ")}`);
     if (a.notes) lines.push(`- Additional information: ${a.notes.replace(/\n/g, "\n  ")}`);

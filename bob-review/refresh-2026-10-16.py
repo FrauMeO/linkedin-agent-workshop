@@ -249,3 +249,18 @@ for s in q["sections"]:
         if item["id"] in YESNO:
             item["files"]["yesno"] = list(YESNO[item["id"]])
 P.write_text(json.dumps(q, indent=2, ensure_ascii=False) + "\n")
+
+# Yes/No items where a Yes also needs details: the Yes button opens a box with this prompt.
+YES_DETAIL = {
+    "Q-11": {"c": "Which letters, and what should the correction say?"},
+    "Q-15": {"c": "Who may be named?"},
+    "Q-04": {"c": "Who will review them, and by when?"},
+    "CR-6": {"a": "What did you do in the hypercare period, and for how long?"},
+    "JS-4": {"b": "Which ones belong?"},
+    "LI-1": {"b": "What kind of fractional role?"},
+}
+for s in q["sections"]:
+    for item in s["questions"]:
+        if item["id"] in YES_DETAIL:
+            item["files"]["yesDetail"] = YES_DETAIL[item["id"]]
+P.write_text(json.dumps(q, indent=2, ensure_ascii=False) + "\n")

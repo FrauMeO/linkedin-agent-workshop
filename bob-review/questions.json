@@ -184,7 +184,10 @@
             ],
             "yesno": [
               "c"
-            ]
+            ],
+            "yesDetail": {
+              "c": "Which letters, and what should the correction say?"
+            }
           }
         },
         {
@@ -220,7 +223,10 @@
             ],
             "yesno": [
               "c"
-            ]
+            ],
+            "yesDetail": {
+              "c": "Who may be named?"
+            }
           }
         }
       ]
@@ -246,7 +252,10 @@
             ],
             "yesno": [
               "c"
-            ]
+            ],
+            "yesDetail": {
+              "c": "Who will review them, and by when?"
+            }
           }
         },
         {
@@ -528,7 +537,10 @@
             ],
             "yesno": [
               "a"
-            ]
+            ],
+            "yesDetail": {
+              "a": "What did you do in the hypercare period, and for how long?"
+            }
           }
         },
         {
@@ -663,7 +675,10 @@
             ],
             "yesno": [
               "b"
-            ]
+            ],
+            "yesDetail": {
+              "b": "Which ones belong?"
+            }
           }
         }
       ]
@@ -690,7 +705,10 @@
             ],
             "yesno": [
               "b"
-            ]
+            ],
+            "yesDetail": {
+              "b": "What kind of fractional role?"
+            }
           }
         },
         {
