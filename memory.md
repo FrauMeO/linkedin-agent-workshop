@@ -36,3 +36,8 @@ Running log of decisions made in this project, newest first. Append only — see
   Why: many desk questions already had answers or contradictions in the files.
 - **Miah's 9 Oct statements override files:** Syniti spelling; no "Olmsted Data Advisory"; @transformingdata.llc → rbolmsted.com; Bob holds the shared Outskill courses.
 - **Backup quarantine stopped partway** (77/111 subfolders). Move only, never delete. See sessions/2026-10-09.md.
+
+## 2026-10-16
+
+- **Approval desk v1.2: each question shows what Box files already say** (status + decisions needed), and adds CR-1..CR-10 career facts and WP-1 (TransformingData white paper). Why: Bob can confirm or correct rather than answer from scratch; file notes are never treated as his answers.
+- **Firm name direction: TransformingData, LLC** (13 Oct white paper; Miah 9 Oct). Not registered on file; NAME asks Bob to confirm.

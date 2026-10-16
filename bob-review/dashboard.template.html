@@ -84,6 +84,12 @@
   .advice b { font: 500 0.7rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); display: block; margin-bottom: 2px; }
   .advice small { display: block; color: var(--ink-soft); margin-top: 4px; }
   .caution { max-width: 62ch; font-size: 0.88rem; background: var(--warn-wash); color: var(--warn); border-radius: 4px; padding: 8px 12px; }
+  .files { max-width: 62ch; font-size: 0.88rem; background: var(--bg); border: 1px solid var(--rule); border-left: 3px solid var(--ink-soft); border-radius: 4px; padding: 8px 12px; display: grid; gap: 6px; }
+  .files b { font: 500 0.7rem var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft); }
+  .files.conflict { border-left-color: var(--warn); } .files.conflict b { color: var(--warn); }
+  .files.canon { border-left-color: var(--ok); } .files.canon b { color: var(--ok); }
+  .files.partly { border-left-color: var(--joint); } .files.partly b { color: var(--joint); }
+  .files ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
   .chip.state { margin-left: auto; background: var(--rule); color: var(--ink-soft); }
   .q[data-state="answered"] .chip.state { background: var(--ok-wash); color: var(--ok); }
   .q[data-state="discuss"] .chip.state { background: var(--joint-wash); color: var(--joint); }
@@ -117,9 +123,9 @@
 
 <div class="wrap">
   <header class="top">
-    <span class="eyebrow">Three-role strategy · version 1.1 · 1 October 2026</span>
+    <span class="eyebrow">Three-role strategy · desk version 1.2 · refreshed 16 October 2026</span>
     <h1>Bob's Approval Desk</h1>
-    <p>Answer by number. Most answers take one sentence. Your answers save as you type, and Miah receives them. Nothing is published, sent, purchased or activated by anything on this page.</p>
+    <p>Answer by number. Most answers take one sentence. Under each question you will see what the Box files already say; your answer is what settles it. Your answers save as you type, and Miah receives them. Nothing is published, sent, purchased or activated by anything on this page.</p>
   </header>
 
   <div class="bar" id="bar">
@@ -130,13 +136,14 @@
       <button type="button" data-f="answered" aria-pressed="false">Answered</button>
       <button type="button" data-f="outside" aria-pressed="false">Needs outside review</button>
       <button type="button" data-f="joint" aria-pressed="false">Joint with Miah</button>
+      <button type="button" data-f="conflict" aria-pressed="false">Files disagree</button>
       <button type="button" data-f="advice" aria-pressed="false">New from the advice</button>
     </div>
     <div class="savestate" id="savestate" role="status" aria-live="polite"></div>
   </div>
 
   <div class="notice" id="scan">
-    <h2>What changed since the summary PDF</h2>
+    <h2>What changed since the 1 October summary</h2>
     <ul id="scanlist"></ul>
   </div>
   <div class="ro" id="readonly" hidden>This view is read-only, so answers cannot be saved. Ask Miah for edit access.</div>
@@ -187,6 +194,8 @@ const el = (tag, props = {}, ...kids) => {
   return n;
 };
 const allQs = DATA.sections.flatMap((s) => s.questions);
+const FILE_LABEL = { "CONFLICT": "Files disagree", "PARTLY ANSWERED": "Partly answered", "ANSWERED BY CANON": "Answered in the files", "OPEN": "Not in the files" };
+const FILE_CLASS = { "CONFLICT": "conflict", "PARTLY ANSWERED": "partly", "ANSWERED BY CANON": "canon", "OPEN": "" };
 const STATE_LABEL = { open: "Open", answered: "Answered", discuss: "Discuss with Miah", later: "Come back later" };
 
 function setSave(msg, err) { const s = $("#savestate"); s.textContent = msg; s.classList.toggle("err", !!err); }
@@ -219,6 +228,12 @@ function build() {
       const body = [head, el("h3", { text: q.title }), el("p", { class: "prompt", text: q.prompt }), el("p", { class: "why", text: q.why })];
       if (q.advice) body.push(el("div", { class: "advice" }, el("b", { text: "What the advice says" }), el("span", { text: q.advice }), el("small", { text: DATA.sources[q.source].detail + (q.sourceRef ? " Reference: " + q.sourceRef + "." : "") })));
       if (q.caution) body.push(el("p", { class: "caution", text: q.caution }));
+      if (q.files) {
+        const f = q.files, cls = FILE_CLASS[f.status] || "";
+        const box = el("div", { class: "files " + cls }, el("b", { text: "Already in the files · " + (FILE_LABEL[f.status] || f.status) }), el("span", { text: f.text }));
+        if (f.decide && f.decide.length) box.append(el("ul", {}, ...f.decide.map((d) => el("li", { text: d }))));
+        body.push(box);
+      }
       if (q.fields) {
         const grid = el("div", { class: "fields" });
         for (const f of q.fields) {
@@ -266,7 +281,7 @@ function refreshAll() {
   $("#fill").style.width = (100 * done / allQs.length) + "%";
   for (const q of allQs) {
     const r = els[q.id], st = r.root.dataset.state;
-    const show = filter === "all" || (filter === "open" && st !== "answered") || (filter === "answered" && st === "answered") || (filter === "outside" && q.tag === "outside") || (filter === "joint" && q.tag === "joint") || (filter === "advice" && !!q.source);
+    const show = filter === "all" || (filter === "open" && st !== "answered") || (filter === "answered" && st === "answered") || (filter === "outside" && q.tag === "outside") || (filter === "joint" && q.tag === "joint") || (filter === "advice" && !!q.source) || (filter === "conflict" && !!q.files && q.files.status === "CONFLICT");
     r.root.hidden = !show;
   }
 }
