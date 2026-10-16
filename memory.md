@@ -42,3 +42,4 @@ Running log of decisions made in this project, newest first. Append only — see
 - **Approval desk v1.2: each question shows what Box files already say** (status + decisions needed), and adds CR-1..CR-10 career facts and WP-1 (TransformingData white paper). Why: Bob can confirm or correct rather than answer from scratch; file notes are never treated as his answers.
 - **Firm name direction: TransformingData, LLC** (13 Oct white paper; Miah 9 Oct). Not registered on file; NAME asks Bob to confirm.
 - **Bob's desk answers are kept in Box, word for word, in two parts** (pt1 and pt2 in _2026DraftsforMiah). Why: Miah wanted his exact answers, not a condensed version, and his pay, health and family details must stay out of GitHub.
+- **Box-only rule for Bob's answers lifted for his private repo** (Miah, 16 Oct). They now also live in FrauMeO/bob-approval-dashboard `answers/`. This workshop repo is public, so keep them out of it.
