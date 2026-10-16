@@ -76,6 +76,7 @@
   .q[hidden] { display: none; }
   .qhead { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; }
   .qid { font: 500 0.8rem var(--font-mono); background: var(--bg); border: 1px solid var(--rule); padding: 2px 7px; border-radius: 3px; }
+  .qcode { font: 400 0.72rem var(--font-mono); color: var(--ink-soft); }
   .chip { font: 500 0.72rem/1 var(--font-body); padding: 4px 8px; border-radius: 999px; }
   .chip.outside { background: var(--warn-wash); color: var(--warn); }
   .chip.joint { background: var(--joint-wash); color: var(--joint); }
@@ -213,6 +214,7 @@ const el = (tag, props = {}, ...kids) => {
   return n;
 };
 const allQs = DATA.sections.flatMap((s) => s.questions);
+let seq = 0; for (const q of allQs) if (q.owner !== "miah") q._n = ++seq;
 for (const q of allQs) if (!q.fields && q.files && q.files.decide && (q.files.decide.length > 1 || (q.files.yesno || []).length)) {
   q._subs = true;
   const yn = q.files.yesno || [], yd = q.files.yesDetail || {};
@@ -273,7 +275,7 @@ function build() {
     const g = el("section", { class: "group" }, el("h2", { text: sec.title }), el("p", { class: "blurb", text: sec.blurb }));
     for (const q of sec.questions) {
       const r = { fieldInputs: {}, flag: "" };
-      const head = el("div", { class: "qhead" }, el("span", { class: "qid", text: q.id }));
+      const head = el("div", { class: "qhead" }, el("span", { class: "qid", text: q._n ? String(q._n) : "–" }), el("span", { class: "qcode", text: q.id }));
       if (q.tag === "outside") head.append(el("span", { class: "chip outside", text: "Needs outside review" }));
       if (q.tag === "joint") head.append(el("span", { class: "chip joint", text: "Joint with Miah" }));
       if (q.source) head.append(el("span", { class: "chip src", text: DATA.sources[q.source].label }));
