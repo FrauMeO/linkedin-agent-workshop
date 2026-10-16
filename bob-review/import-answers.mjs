@@ -47,7 +47,7 @@ for (const sec of questions.sections) {
     if (!a) { lines.push("- Status: Open (no answer imported)", ""); continue; }
     lines.push(`- Status: ${label[a.status] || a.status}`);
     const yn = (q.files && q.files.yesno) || [];
-    const subs = !q.fields && q.files && (q.files.decide || []).length > 1 ? q.files.decide.flatMap((d, i) => { const k = "abcdefgh"[i];
+    const subs = !q.fields && q.files && ((q.files.decide || []).length > 1 || yn.length) ? q.files.decide.flatMap((d, i) => { const k = "abcdefgh"[i];
       const row = { key: k, label: k + ". " + d };
       const v = (a.fields || {})[k], yd = ((q.files && q.files.yesDetail) || {})[k];
       if (!yn.includes(k) || !(a.fields || {})[k + "_note"]) return [row];

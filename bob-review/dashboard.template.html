@@ -213,7 +213,7 @@ const el = (tag, props = {}, ...kids) => {
   return n;
 };
 const allQs = DATA.sections.flatMap((s) => s.questions);
-for (const q of allQs) if (!q.fields && q.files && q.files.decide && q.files.decide.length > 1) {
+for (const q of allQs) if (!q.fields && q.files && q.files.decide && (q.files.decide.length > 1 || (q.files.yesno || []).length)) {
   q._subs = true;
   const yn = q.files.yesno || [], yd = q.files.yesDetail || {};
   q.fields = q.files.decide.flatMap((d, i) => { const k = "abcdefgh"[i];
@@ -279,7 +279,7 @@ function build() {
       if (q.source) head.append(el("span", { class: "chip src", text: DATA.sources[q.source].label }));
       r.chip = el("span", { class: "chip state", text: "Open" });
       head.append(r.chip);
-      const body = [head, el("h3", { text: q.title }), el("p", { class: "prompt", text: q.prompt }), el("p", { class: "why", text: q.why })];
+      const body = [head, el("h3", { text: q.title }), el("p", { class: "prompt", text: q.prompt }), q.why ? el("p", { class: "why", text: q.why }) : null].filter(Boolean);
       if (q.advice) body.push(el("div", { class: "advice" }, el("b", { text: "What the advice says" }), el("span", { text: q.advice }), el("small", { text: DATA.sources[q.source].detail + (q.sourceRef ? " Reference: " + q.sourceRef + "." : "") })));
       if (q.caution) body.push(el("p", { class: "caution", text: q.caution }));
       if (q.files) {
@@ -315,7 +315,7 @@ function build() {
       } else {
         r.text = el("textarea", { id: `${q.id}-answer` });
         r.text.addEventListener("input", () => touch(q));
-        body.push(el("div", {}, el("label", { class: "lbl", for: r.text.id, text: "Your answer" }), r.text));
+        body.push(el("div", {}, el("label", { class: "lbl", for: r.text.id, text: q.owner === "miah" ? "Anything Miah should know? (optional)" : "Your answer" }), r.text));
       }
       r.notes = el("textarea", { id: `${q.id}-notes` });
       r.notes.addEventListener("input", () => touch(q));
@@ -358,9 +358,10 @@ function refresh(q) {
 }
 function refreshAll() {
   let done = 0;
-  for (const q of allQs) if (refresh(q) === "answered") done++;
-  $("#count").textContent = `${done} of ${allQs.length} answered`;
-  $("#fill").style.width = (100 * done / allQs.length) + "%";
+  const bobQs = allQs.filter((q) => q.owner !== "miah");
+  for (const q of allQs) if (refresh(q) === "answered" && q.owner !== "miah") done++;
+  $("#count").textContent = `${done} of ${bobQs.length} answered`;
+  $("#fill").style.width = (100 * done / bobQs.length) + "%";
   for (const q of allQs) {
     const r = els[q.id], st = r.root.dataset.state;
     const show = filter === "all" || (filter === "open" && st !== "answered") || (filter === "answered" && st === "answered") || (filter === "outside" && q.tag === "outside") || (filter === "joint" && q.tag === "joint") || (filter === "advice" && !!q.source) || (filter === "conflict" && !!q.files && q.files.status === "CONFLICT");
