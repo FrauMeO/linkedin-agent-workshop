@@ -118,6 +118,8 @@
   .primary:disabled { opacity: 0.55; cursor: not-allowed; }
   .secondary { font: 500 0.88rem var(--font-body); background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 9px 14px; cursor: pointer; width: fit-content; }
   .recorded { color: var(--ok); font-weight: 500; }
+  .saverow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .savemsg { font-size: 0.85rem; color: var(--ok); } .savemsg.err { color: var(--warn); }
   footer { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: var(--ink-soft); font-size: 0.85rem; }
 </style>
 
@@ -198,6 +200,10 @@ const FILE_LABEL = { "CONFLICT": "Files disagree", "PARTLY ANSWERED": "Partly an
 const FILE_CLASS = { "CONFLICT": "conflict", "PARTLY ANSWERED": "partly", "ANSWERED BY CANON": "canon", "OPEN": "" };
 const STATE_LABEL = { open: "Open", answered: "Answered", discuss: "Discuss with Miah", later: "Come back later" };
 
+const LKEY = "bob-desk-answers-v1";
+function loadLocal() { try { return JSON.parse(localStorage.getItem(LKEY) || "{}"); } catch (e) { return {}; } }
+function saveLocal(id, a) { try { const all = loadLocal(); all[id] = { ...a, updatedAt: new Date().toISOString() }; localStorage.setItem(LKEY, JSON.stringify(all)); } catch (e) {} }
+const local = loadLocal();
 function setSave(msg, err) { const s = $("#savestate"); s.textContent = msg; s.classList.toggle("err", !!err); }
 
 function derive(q, a) {
@@ -256,7 +262,11 @@ function build() {
       for (const [btn, val] of [[r.later, "later"], [r.discuss, "discuss"]]) {
         btn.addEventListener("click", () => { r.flag = r.flag === val ? "" : val; touch(q); });
       }
+      r.saveBtn = el("button", { type: "button", class: "primary", text: "Save my answer" });
+      r.saveMsg = el("span", { class: "savemsg", role: "status", "aria-live": "polite" });
+      r.saveBtn.addEventListener("click", () => { clearTimeout(timers[q.id]); saveLocal(q.id, localAnswer(q)); saveAnswer(q, true); });
       body.push(el("div", { class: "flags" }, r.later, r.discuss));
+      body.push(el("div", { class: "saverow" }, r.saveBtn, r.saveMsg));
       r.root = el("article", { class: "q", "data-state": "open", id: "q-" + q.id }, ...body);
       r.root.dataset.tag = q.tag || "";
       els[q.id] = r;
@@ -288,6 +298,7 @@ function refreshAll() {
 
 function touch(q) {
   r_dirty(q.id);
+  saveLocal(q.id, localAnswer(q));
   refreshAll();
   if (!state.canWrite) return;
   setSave("Saving…");
@@ -298,18 +309,20 @@ const dirty = new Set();
 function r_dirty(id) { dirty.add(id); }
 
 function enqueue(path, data) {
-  chains[path] = (chains[path] || Promise.resolve()).then(() => db.doc(path).set(data)).then(() => setSave("Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })), (e) => { setSave("Could not save: " + (e && e.message || e.code || "unknown error") + ". Use “Save a copy of my answers”.", true); });
+  chains[path] = (chains[path] || Promise.resolve()).then(() => db.doc(path).set(data)).then(() => setSave("Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })), (e) => { setSave("Not saved to Miah: " + (e && (e.code || e.message) || "unknown error") + ". Your typing is kept on this device. Use “Save a copy of my answers” and send the file to Miah.", true); });
   return chains[path];
 }
-function saveAnswer(q) {
-  if (!db) { setSave("Not connected, so nothing was saved. Use “Save a copy of my answers”.", true); return; }
+function saveAnswer(q, manual) {
+  const r = els[q.id], note = (t, err) => { if (manual) { r.saveMsg.textContent = t; r.saveMsg.classList.toggle("err", !!err); } };
+  if (!db) { note("Kept on this device only. Use “Save a copy of my answers” at the bottom and send the file to Miah.", true); setSave("Not connected, so nothing was sent to Miah. Use “Save a copy of my answers”.", true); return; }
   const a = localAnswer(q);
   enqueue("answers/" + q.id, { id: q.id, title: q.title, status: derive(q, a), text: a.text, fields: a.fields, notes: a.notes, flag: a.flag, updatedAt: new Date().toISOString() })
-    .then(() => dirty.delete(q.id));
+    .then(() => { if (!$("#savestate").classList.contains("err")) { dirty.delete(q.id); note("Saved. Miah can see this answer."); } else note("Not sent to Miah. Your answer is kept on this device; use “Save a copy of my answers” at the bottom.", true); });
 }
 
 function applyRemote(id, d) {
   const q = allQs.find((x) => x.id === id); if (!q || dirty.has(id)) return;
+  if (local[id] && local[id].updatedAt && d.updatedAt && local[id].updatedAt > d.updatedAt) return;
   const r = els[id];
   if (r.text && document.activeElement !== r.text) r.text.value = d.text || "";
   if (q.fields) for (const f of q.fields) if (document.activeElement !== r.fieldInputs[f.key]) r.fieldInputs[f.key].value = (d.fields || {})[f.key] || "";
@@ -370,5 +383,8 @@ async function connect() {
   db.doc("meta/general").onSnapshot((s) => { if (s.exists && document.activeElement !== $("#general")) $("#general").value = s.data().notes || ""; });
 }
 
-build(); bind(); refreshAll(); connect();
+build(); bind();
+for (const [id, a] of Object.entries(local)) applyRemote(id, a);
+for (const id of Object.keys(local)) if (allQs.some((q) => q.id === id)) dirty.add(id);
+refreshAll(); connect().then(() => { if (db && state.canWrite) for (const q of allQs) if (dirty.has(q.id)) saveAnswer(q); });
 </script>
