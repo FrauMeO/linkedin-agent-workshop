@@ -119,6 +119,11 @@
   .secondary { font: 500 0.88rem var(--font-body); background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 9px 14px; cursor: pointer; width: fit-content; }
   .recorded { color: var(--ok); font-weight: 500; }
   .subs { display: grid; gap: 12px; max-width: 62ch; }
+  .helpbtn { font: 500 0.8rem var(--font-body); background: transparent; color: var(--accent); border: 1px dashed var(--accent); border-radius: 4px; padding: 6px 10px; cursor: pointer; }
+  .help { display: grid; gap: 8px; max-width: 62ch; background: var(--accent-wash); border-radius: 6px; padding: 12px; }
+  .help[hidden] { display: none; }
+  .helpout { white-space: pre-wrap; font-size: 0.92rem; line-height: 1.5; }
+  .helpout.err { color: var(--warn); }
   .ynrow { display: grid; gap: 6px; }
   .ynrow .lbl { font-size: 0.88rem; line-height: 1.4; color: var(--ink); margin: 0; }
   .ynbtns { display: flex; gap: 8px; }
@@ -317,7 +322,16 @@ function build() {
         btn.addEventListener("click", () => { r.flag = r.flag === val ? "" : val; touch(q); });
       }
       r.saved = el("span", { class: "qsaved", role: "status", "aria-live": "polite" });
-      body.push(el("div", { class: "flags" }, r.later, r.discuss, r.saved));
+      r.helpBtn = el("button", { type: "button", class: "helpbtn", hidden: "", "aria-expanded": "false", text: "I don't understand this" });
+      r.helpBox = el("div", { class: "help", hidden: "" });
+      r.helpIn = el("textarea", { id: `${q.id}-help`, rows: "2", placeholder: "What part is unclear? (optional)" });
+      r.helpGo = el("button", { type: "button", class: "primary", text: "Explain it to me" });
+      r.helpOut = el("div", { class: "helpout", "aria-live": "polite" });
+      r.helpBox.append(el("label", { class: "lbl", for: r.helpIn.id, text: "Ask about this question" }), r.helpIn, r.helpGo, r.helpOut);
+      r.helpBtn.addEventListener("click", () => { const open = r.helpBox.hidden; r.helpBox.hidden = !open; r.helpBtn.setAttribute("aria-expanded", String(open)); if (open) r.helpIn.focus(); });
+      r.helpGo.addEventListener("click", () => explain(q));
+      body.push(el("div", { class: "flags" }, r.later, r.discuss, r.helpBtn, r.saved));
+      body.push(r.helpBox);
       r.root = el("article", { class: "q", "data-state": "open", id: "q-" + q.id }, ...body);
       r.root.dataset.tag = q.tag || "";
       els[q.id] = r;
@@ -436,7 +450,38 @@ function bind() {
   });
 }
 
+let sample = null;
+const HELP_ERR = { rate_limited: "Too many questions at once. Wait a minute, then try again.", not_granted: "Explanations are turned off for this page.", refused: "I couldn't answer that one. Use “Discuss with Miah”.", session_expired: "Please reload the page and try again." };
+function helpPrompt(q, ask) {
+  const f = q.files || {};
+  const parts = (q.fields || []).filter((x) => !x.note).map((x) => "- " + x.label + (x.yn ? " (answer Yes or No)" : "")).join("\n");
+  return [
+    "You are helping Bob Olmsted, a senior data-migration consultant, answer one question on his approval desk. Miah, his wife and business partner, wrote the desk. Bob reads it on a screen and says he does not understand this question.",
+    "Explain in plain words what the question asks, why Miah needs it, and what a good answer looks like (for example: Yes or No, a number, a date, or one sentence). If there are parts a, b, c, explain each in one line.",
+    "Rules: under 130 words. Speak to Bob as \"you\". No jargon; if you must use a term, explain it in a few words. Do NOT answer the question for him, do NOT give legal, tax or career advice, and do NOT add facts that are not below. If the question cannot be answered from what he knows, say he can tap \"Come back later\" or \"Discuss with Miah\". Plain text, no headings, no bold.",
+    "", "QUESTION " + q.id + ": " + q.title, "Asks: " + q.prompt, "Why it matters: " + (q.why || ""),
+    f.text ? "What the Box files already say (" + (FILE_LABEL[f.status] || f.status) + "): " + f.text : "",
+    parts ? "Parts to answer:\n" + parts : "",
+    q.caution ? "Caution on the page: " + q.caution : "",
+    "", "Background: the package is a draft three-role strategy (version 1.1, 17 September 2026). Nothing has been published. Lam Research and Accenture are kept out of published material for now (the round-one exclusion).",
+    "", "Bob's words: " + (ask || "(he did not say which part; explain the whole question)"),
+  ].filter((x) => x !== "").join("\n");
+}
+async function explain(q) {
+  const r = els[q.id]; if (!sample) return;
+  const ask = r.helpIn.value.trim();
+  r.helpGo.disabled = true; r.helpOut.classList.remove("err"); r.helpOut.textContent = "Thinking…";
+  try {
+    const res = await sample(helpPrompt(q, ask), { modelTier: "default", cache: false, onText: ({ text }) => { r.helpOut.textContent = text; } });
+    r.helpOut.textContent = res.text;
+    if (db && state.canWrite) db.doc("help/" + q.id + "-" + Date.now()).set({ qid: q.id, title: q.title, asked: ask, answer: res.text, at: new Date().toISOString() }).catch(() => {});
+  } catch (e) {
+    r.helpOut.classList.add("err");
+    r.helpOut.textContent = (e && e.text) || HELP_ERR[e && e.code] || "That didn't work. Try again, or use “Discuss with Miah”.";
+  } finally { r.helpGo.disabled = false; }
+}
 async function connect() {
+  claude.use("sample").then((s) => { if (!s) return; sample = s; for (const q of allQs) els[q.id].helpBtn.hidden = false; }).catch(() => {});
   const user = await claude.use("user").catch(() => null);
   if (user && typeof user.can === "function") { const c = user.can("data.write"); if (c === false) { state.canWrite = false; $("#readonly").hidden = false; for (const t of document.querySelectorAll("textarea,input,.flags button,#record")) t.disabled = true; } }
   db = await claude.use("db").catch(() => null);
