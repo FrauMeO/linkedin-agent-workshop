@@ -237,3 +237,15 @@ q["asOf"] = "2026-10-16"
 P.write_text(json.dumps(q, indent=2, ensure_ascii=False) + "\n")
 n = sum(len(s["questions"]) for s in q["sections"])
 print(f"questions.json v{q['version']}: {n} items, {sum(1 for s in q['sections'] for x in s['questions'] if 'files' in x)} with file notes")
+
+# Sub-questions that take a plain Yes/No (rendered as two buttons on the desk).
+YESNO = {
+    "Q-03": "b", "Q-11": "c", "Q-12": "c", "Q-15": "c", "Q-04": "c", "Q-13": "a", "Q-23": "ac", "WP-1": "c",
+    "Q-24": "c", "CR-1": "abc", "CR-2": "ab", "CR-4": "a", "CR-5": "a", "CR-6": "a", "CR-8": "b", "CR-10": "b",
+    "JS-1": "b", "JS-4": "b", "LI-1": "b", "LI-3": "b", "LI-6": "b", "IV-2": "ab", "EM-3": "b",
+}
+for s in q["sections"]:
+    for item in s["questions"]:
+        if item["id"] in YESNO:
+            item["files"]["yesno"] = list(YESNO[item["id"]])
+P.write_text(json.dumps(q, indent=2, ensure_ascii=False) + "\n")

@@ -119,6 +119,12 @@
   .secondary { font: 500 0.88rem var(--font-body); background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 9px 14px; cursor: pointer; width: fit-content; }
   .recorded { color: var(--ok); font-weight: 500; }
   .subs { display: grid; gap: 12px; max-width: 62ch; }
+  .ynrow { display: grid; gap: 6px; }
+  .ynrow .lbl { font-size: 0.88rem; line-height: 1.4; color: var(--ink); margin: 0; }
+  .ynbtns { display: flex; gap: 8px; }
+  .yn { font: 600 0.9rem var(--font-body); min-width: 72px; padding: 8px 16px; border-radius: 4px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); cursor: pointer; }
+  .yn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .yn:focus-visible { outline: 2px solid var(--focus, var(--accent)); outline-offset: 2px; }
   .subs label.lbl { font-size: 0.88rem; line-height: 1.4; color: var(--ink); }
   .qsaved { margin-left: auto; align-self: center; font-size: 0.85rem; color: var(--ok); font-weight: 500; }
   .qsaved.err { color: var(--warn); }
@@ -202,7 +208,9 @@ const el = (tag, props = {}, ...kids) => {
 const allQs = DATA.sections.flatMap((s) => s.questions);
 for (const q of allQs) if (!q.fields && q.files && q.files.decide && q.files.decide.length > 1) {
   q._subs = true;
-  q.fields = q.files.decide.map((d, i) => { const k = "abcdefgh"[i]; return { key: k, label: k + ". " + d, long: true }; });
+  const yn = q.files.yesno || [];
+  q.fields = q.files.decide.flatMap((d, i) => { const k = "abcdefgh"[i];
+    return yn.includes(k) ? [{ key: k, label: k + ". " + d, yn: true }, { key: k + "_note", label: "If no, what is right?", note: k }] : [{ key: k, label: k + ". " + d, long: true }]; });
 }
 const FILE_LABEL = { "CONFLICT": "Files disagree", "PARTLY ANSWERED": "Partly answered", "ANSWERED BY CANON": "Answered in the files", "OPEN": "Not in the files" };
 const FILE_CLASS = { "CONFLICT": "conflict", "PARTLY ANSWERED": "partly", "ANSWERED BY CANON": "canon", "OPEN": "" };
@@ -273,7 +281,20 @@ function build() {
       }
       if (q.fields) {
         const grid = el("div", { class: q._subs ? "subs" : "fields" });
+        r.yn = {};
         for (const f of q.fields) {
+          if (f.note) continue;
+          if (f.yn) {
+            const val = el("input", { type: "hidden", id: `${q.id}-${f.key}` });
+            const note = el("input", { type: "text", id: `${q.id}-${f.key}_note`, placeholder: "If no, what is right? (optional)" });
+            note.addEventListener("input", () => touch(q));
+            const pick = (v) => { val.value = val.value === v ? "" : v; touch(q); };
+            const yes = el("button", { type: "button", class: "yn", "aria-pressed": "false", text: "Yes", onclick: () => pick("Yes") });
+            const no = el("button", { type: "button", class: "yn", "aria-pressed": "false", text: "No", onclick: () => pick("No") });
+            r.fieldInputs[f.key] = val; r.fieldInputs[f.key + "_note"] = note; r.yn[f.key] = { val, yes, no, note };
+            grid.append(el("div", { class: "ynrow" }, el("span", { class: "lbl", text: f.label }), el("div", { class: "ynbtns" }, yes, no), note));
+            continue;
+          }
           const inp = f.long ? el("textarea", { id: `${q.id}-${f.key}`, rows: "2" }) : el("input", { type: "text", id: `${q.id}-${f.key}`, inputmode: "numeric" });
           inp.addEventListener("input", () => touch(q));
           r.fieldInputs[f.key] = inp;
@@ -310,6 +331,7 @@ function refresh(q) {
   r.chip.textContent = STATE_LABEL[st];
   r.later.setAttribute("aria-pressed", String(r.flag === "later"));
   r.discuss.setAttribute("aria-pressed", String(r.flag === "discuss"));
+  for (const y of Object.values(r.yn || {})) { y.yes.setAttribute("aria-pressed", String(y.val.value === "Yes")); y.no.setAttribute("aria-pressed", String(y.val.value === "No")); y.note.hidden = y.val.value !== "No"; }
   return st;
 }
 function refreshAll() {

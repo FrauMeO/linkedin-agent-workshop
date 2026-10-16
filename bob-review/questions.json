@@ -119,6 +119,9 @@
               "Your hourly or day rate on Lam and on your latest contract (kept private).",
               "Are the \"$220\" and \"155\" figures in your notes hourly rates?",
               "Rule on the three open pricing approvals: $75,000 Tier 3 ceiling, $24,500 Tier 2 fallback, one-card rule."
+            ],
+            "yesno": [
+              "b"
             ]
           }
         },
@@ -178,6 +181,9 @@
               "In one sentence: designed it, co-built it with the SMEs, or taught and refined an existing one?",
               "If designed: what existed before you arrived?",
               "Do letters already sent with \"designed and delivered\" need a correction if an interview follows?"
+            ],
+            "yesno": [
+              "c"
             ]
           }
         },
@@ -193,6 +199,9 @@
               "Exact exam name and date, plus the score report or a portal screenshot.",
               "Was a certificate issued, and at what level, or was it a score only?",
               "Retire \"Scored at Master level\" and \"above the Master level\"?"
+            ],
+            "yesno": [
+              "c"
             ]
           }
         },
@@ -208,6 +217,9 @@
               "Class names or product taught, years, and rough number of cohorts.",
               "The power-user pass rate with cohort size, or agree it stays out of public material.",
               "May any former students be named? (See Q-13.)"
+            ],
+            "yesno": [
+              "c"
             ]
           }
         }
@@ -231,6 +243,9 @@
               "Read the Accenture separation paperwork: does it limit publicity, client references, non-solicitation or engagement figures? Yes or no for each.",
               "Same four checks for the Lam/Magnit contract.",
               "Will an adviser review them before the site names Lam or Accenture?"
+            ],
+            "yesno": [
+              "c"
             ]
           }
         },
@@ -261,6 +276,9 @@
               "Is the fifth name Ahold Delhaize?",
               "Spellings for public use: Lam Research or LAM Research; Purdue Pharma?",
               "Pick one list: A, Eli Lilly, Kraft and Graybar only; B, also Novelis, SABMiller, Merck, Kautex and ExxonMobil; C, also Lam Research, Chevron, Dow and Exxon."
+            ],
+            "yesno": [
+              "a"
             ]
           }
         },
@@ -276,6 +294,10 @@
               "Confirm: the exclusion covers published content only; interviews and private talks are free, subject to your agreements.",
               "Approve or reject the 29 Sep lift for the site, and say whether it is site-only or wider.",
               "Does your LinkedIn profile count as published material?"
+            ],
+            "yesno": [
+              "a",
+              "c"
             ]
           }
         },
@@ -305,6 +327,9 @@
               "Name colleagues, or show roles only?",
               "Confirm your Dimension Data title (see CR-10).",
               "Is Dimension Data cleared to name in public?"
+            ],
+            "yesno": [
+              "c"
             ]
           }
         }
@@ -389,6 +414,9 @@
               "Set the trigger: a date, or a condition such as agreements reviewed.",
               "Who at Lam and Accenture would give clearance, and for what?",
               "Does the 29 Sep lift replace the month-six gate for the site?"
+            ],
+            "yesno": [
+              "c"
             ]
           }
         }
@@ -411,6 +439,11 @@
               "Confirm February to July 2026, via Magnit.",
               "Retire \"current\" and \"Present\" everywhere.",
               "May Magnit be named?"
+            ],
+            "yesno": [
+              "a",
+              "b",
+              "c"
             ]
           }
         },
@@ -425,6 +458,10 @@
             "decide": [
               "Confirm January 2026.",
               "May Amgen be named as the medical device client?"
+            ],
+            "yesno": [
+              "a",
+              "b"
             ]
           }
         },
@@ -454,6 +491,9 @@
             "decide": [
               "Adopt \"BackOffice Associates, now Syniti\".",
               "Confirm the year Capgemini acquired Syniti before using it."
+            ],
+            "yesno": [
+              "a"
             ]
           }
         },
@@ -468,6 +508,9 @@
             "decide": [
               "Approve one sentence: proposal and solutioning on two accepted pilots, no hands-on work. Remove both from the Skills line.",
               "Your actual SAP MDG exposure: hands-on, designed around it, or none?"
+            ],
+            "yesno": [
+              "a"
             ]
           }
         },
@@ -482,6 +525,9 @@
             "decide": [
               "Did you support a hypercare period on the oil-and-gas go-live?",
               "Which of your lead engagements ran through hypercare?"
+            ],
+            "yesno": [
+              "a"
             ]
           }
         },
@@ -511,6 +557,9 @@
               "One figure, and what it counts from.",
               "Retire \"medical leave\" and \"Retired\"?",
               "What covers 2016 to 2017, and March to July 2019?"
+            ],
+            "yesno": [
+              "b"
             ]
           }
         },
@@ -539,6 +588,9 @@
             "decide": [
               "Your title, and the years.",
               "Is Dimension Data the \"global infrastructure provider\"?"
+            ],
+            "yesno": [
+              "b"
             ]
           }
         }
@@ -560,6 +612,9 @@
             "decide": [
               "Fill in the Client Experience Application, or retire it in favour of Engagement History v6.",
               "Merge the two (and Representative Clients 4) into one document?"
+            ],
+            "yesno": [
+              "b"
             ]
           }
         },
@@ -605,6 +660,9 @@
             "decide": [
               "Name one master and archive the rest.",
               "Do Databricks, Snowflake, SAP MDG and Informatica IDMC belong on the Skills line?"
+            ],
+            "yesno": [
+              "b"
             ]
           }
         }
@@ -629,6 +687,9 @@
             "decide": [
               "Confirm that line or rewrite it.",
               "Is fractional CDO/CTO still a track?"
+            ],
+            "yesno": [
+              "b"
             ]
           }
         },
@@ -665,6 +726,9 @@
             "decide": [
               "\"Seven functional areas\" or \"Master Data plus six process streams\"?",
               "Can the anonymised story sit in About while Lam is named in Experience?"
+            ],
+            "yesno": [
+              "b"
             ]
           }
         },
@@ -717,6 +781,9 @@
             "decide": [
               "Confirm you made these edits, and which draft you used.",
               "Agree to save a dated PDF of the profile to Box whenever you edit it."
+            ],
+            "yesno": [
+              "b"
             ]
           }
         }
@@ -760,6 +827,10 @@
               "Do the three facets replace the older \"Leadership and Profiling\"?",
               "Is Interview_Tone_Quotes v03 the spoken set?",
               "Book one practice session."
+            ],
+            "yesno": [
+              "a",
+              "b"
             ]
           }
         }
@@ -818,6 +889,9 @@
             "decide": [
               "Start from zero, or name the list and how consent was given.",
               "Agree: no imports from LinkedIn connections or old address books without opt-in."
+            ],
+            "yesno": [
+              "b"
             ]
           }
         },
