@@ -118,7 +118,9 @@
   .primary:disabled { opacity: 0.55; cursor: not-allowed; }
   .secondary { font: 500 0.88rem var(--font-body); background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 9px 14px; cursor: pointer; width: fit-content; }
   .recorded { color: var(--ok); font-weight: 500; }
-  .saverow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .sendbar { position: sticky; bottom: 0; z-index: 5; margin-top: 28px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; box-shadow: 0 -4px 14px rgba(0,0,0,0.06); }
+  .sendbar p { margin: 0; flex: 1 1 220px; font-size: 0.88rem; color: var(--ink-soft); }
+  .offline { background: var(--warn-wash); color: var(--warn); border-radius: 6px; padding: 10px 14px; margin-top: 14px; }
   .savemsg { font-size: 0.85rem; color: var(--ok); } .savemsg.err { color: var(--warn); }
   footer { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: var(--ink-soft); font-size: 0.85rem; }
 </style>
@@ -148,6 +150,7 @@
     <h2>What changed since the 1 October summary</h2>
     <ul id="scanlist"></ul>
   </div>
+  <div class="offline" id="offline" hidden>Your answers are not reaching Miah from this view. Keep typing; they stay on this device and will save to Miah automatically once she shares the page with you as an Editor and you reload it while signed in to Claude.</div>
   <div class="ro" id="readonly" hidden>This view is read-only, so answers cannot be saved. Ask Miah for edit access.</div>
 
   <main id="groups"></main>
@@ -171,10 +174,7 @@
     <p id="recorded" class="recorded" hidden></p>
   </section>
 
-  <footer>
-    <button type="button" class="secondary" id="export">Save a copy of my answers</button>
-    <span>A backup file you can send to Miah if the page cannot save.</span>
-  </footer>
+
 </div>
 
 <script>
@@ -204,6 +204,29 @@ const LKEY = "bob-desk-answers-v1";
 function loadLocal() { try { return JSON.parse(localStorage.getItem(LKEY) || "{}"); } catch (e) { return {}; } }
 function saveLocal(id, a) { try { const all = loadLocal(); all[id] = { ...a, updatedAt: new Date().toISOString() }; localStorage.setItem(LKEY, JSON.stringify(all)); } catch (e) {} }
 const local = loadLocal();
+function offline() { $("#offline").hidden = false; }
+function compileAnswers() {
+  const lines = [];
+  for (const q of allQs) {
+    const a = localAnswer(q), vals = [];
+    if (a.text && a.text.trim()) vals.push(a.text.trim());
+    if (q.fields) for (const f of q.fields) if ((a.fields[f.key] || "").trim()) vals.push(f.label + ": " + a.fields[f.key].trim());
+    if (a.notes && a.notes.trim()) vals.push("More: " + a.notes.trim());
+    if (a.flag) vals.push("[" + STATE_LABEL[a.flag] + "]");
+    if (vals.length) lines.push(q.id + " " + q.title + "\n" + vals.join("\n"));
+  }
+  const dec = (document.querySelector('input[name="decision"]:checked') || {}).value;
+  if (dec) lines.push("My decision: " + { approve: "Approve as written", "approve-changes": "Approve with changes", hold: "Hold" }[dec] + ($("#conditions").value.trim() ? "\nChanges or conditions: " + $("#conditions").value.trim() : "") + ($("#signname").value.trim() ? "\nSigned: " + $("#signname").value.trim() + " " + ($("#signdate").value || "") : ""));
+  const g = $("#general").value.trim();
+  if (g) lines.push("Anything else\n" + g);
+  return lines.join("\n\n");
+}
+async function copyAnswers(okMsg) {
+  const body = compileAnswers();
+  if (!body) { $("#sendnote").textContent = "Nothing to copy yet. Type an answer first."; return; }
+  try { await navigator.clipboard.writeText(body); $("#sendnote").textContent = okMsg; }
+  catch (e) { const t = el("textarea", { readonly: "" }); t.value = body; $("#sendbar").after(t); t.select(); $("#sendnote").textContent = "Select all the text in the box below, copy it, and send it to Miah."; }
+}
 function setSave(msg, err) { const s = $("#savestate"); s.textContent = msg; s.classList.toggle("err", !!err); }
 
 function derive(q, a) {
@@ -262,11 +285,7 @@ function build() {
       for (const [btn, val] of [[r.later, "later"], [r.discuss, "discuss"]]) {
         btn.addEventListener("click", () => { r.flag = r.flag === val ? "" : val; touch(q); });
       }
-      r.saveBtn = el("button", { type: "button", class: "primary", text: "Save my answer" });
-      r.saveMsg = el("span", { class: "savemsg", role: "status", "aria-live": "polite" });
-      r.saveBtn.addEventListener("click", () => { clearTimeout(timers[q.id]); saveLocal(q.id, localAnswer(q)); saveAnswer(q, true); });
       body.push(el("div", { class: "flags" }, r.later, r.discuss));
-      body.push(el("div", { class: "saverow" }, r.saveBtn, r.saveMsg));
       r.root = el("article", { class: "q", "data-state": "open", id: "q-" + q.id }, ...body);
       r.root.dataset.tag = q.tag || "";
       els[q.id] = r;
@@ -309,15 +328,14 @@ const dirty = new Set();
 function r_dirty(id) { dirty.add(id); }
 
 function enqueue(path, data) {
-  chains[path] = (chains[path] || Promise.resolve()).then(() => db.doc(path).set(data)).then(() => setSave("Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })), (e) => { setSave("Not saved to Miah: " + (e && (e.code || e.message) || "unknown error") + ". Your typing is kept on this device. Use “Save a copy of my answers” and send the file to Miah.", true); });
+  chains[path] = (chains[path] || Promise.resolve()).then(() => db.doc(path).set(data)).then(() => setSave("Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })), (e) => { setSave("Not sent to Miah: " + (e && (e.code || e.message) || "unknown error") + ".", true); offline(); });
   return chains[path];
 }
 function saveAnswer(q, manual) {
-  const r = els[q.id], note = (t, err) => { if (manual) { r.saveMsg.textContent = t; r.saveMsg.classList.toggle("err", !!err); } };
-  if (!db) { note("Kept on this device only. Use “Save a copy of my answers” at the bottom and send the file to Miah.", true); setSave("Not connected, so nothing was sent to Miah. Use “Save a copy of my answers”.", true); return; }
+  if (!db) return;
   const a = localAnswer(q);
   enqueue("answers/" + q.id, { id: q.id, title: q.title, status: derive(q, a), text: a.text, fields: a.fields, notes: a.notes, flag: a.flag, updatedAt: new Date().toISOString() })
-    .then(() => { if (!$("#savestate").classList.contains("err")) { dirty.delete(q.id); note("Saved. Miah can see this answer."); } else note("Not sent to Miah. Your answer is kept on this device; use “Save a copy of my answers” at the bottom.", true); });
+    .then(() => { if (!$("#savestate").classList.contains("err")) dirty.delete(q.id); else offline(); });
 }
 
 function applyRemote(id, d) {
@@ -354,19 +372,12 @@ function bind() {
     await enqueue("meta/approval", rec);
     setApproval(rec);
   });
-  let gt; $("#general").addEventListener("input", () => { if (!db || !state.canWrite) return; setSave("Saving…"); clearTimeout(gt); gt = setTimeout(() => enqueue("meta/general", { notes: $("#general").value, updatedAt: new Date().toISOString() }), 700); });
+  let gt; $("#general").addEventListener("input", () => { try { localStorage.setItem(LKEY + "-general", $("#general").value); } catch (e) {} if (!db || !state.canWrite) return; setSave("Saving…"); clearTimeout(gt); gt = setTimeout(() => enqueue("meta/general", { notes: $("#general").value, updatedAt: new Date().toISOString() }), 700); });
   for (const id of ["conditions", "signname", "signdate"]) $("#" + id).addEventListener("change", () => {
     if (!db || !state.canWrite) return;
     const decision = (document.querySelector('input[name="decision"]:checked') || {}).value || "";
     if (state.approval && state.approval.recordedAt) return; // keep the recorded decision until Bob records again
     enqueue("meta/approval_draft", { decision, conditions: $("#conditions").value, signedName: $("#signname").value, date: $("#signdate").value, updatedAt: new Date().toISOString() });
-  });
-  $("#export").addEventListener("click", async () => {
-    const dl = await claude.use("downloads").catch(() => null);
-    const out = { exportedAt: new Date().toISOString(), version: DATA.version, answers: {}, approval: state.approval, general: $("#general").value };
-    for (const q of allQs) { const a = localAnswer(q); out.answers[q.id] = { id: q.id, title: q.title, status: derive(q, a), text: a.text, fields: a.fields, notes: a.notes, flag: a.flag }; }
-    if (!dl) { setSave("Saving files is not available in this view.", true); return; }
-    try { await dl.save({ filename: "bob-answers-" + new Date().toISOString().slice(0, 10) + ".json", data: JSON.stringify(out, null, 2) }); } catch (e) { setSave("Save was cancelled.", true); }
   });
 }
 
@@ -374,7 +385,7 @@ async function connect() {
   const user = await claude.use("user").catch(() => null);
   if (user && typeof user.can === "function") { const c = user.can("data.write"); if (c === false) { state.canWrite = false; $("#readonly").hidden = false; for (const t of document.querySelectorAll("textarea,input,.flags button,#record")) t.disabled = true; } }
   db = await claude.use("db").catch(() => null);
-  if (!db) { setSave("Not connected: answers on this page will not be saved. Use “Save a copy of my answers”.", true); return; }
+  if (!db) { offline(); return; }
   db.collection("answers").onSnapshot((snap) => {
     for (const d of snap.docs) { state.answers[d.id] = d.data(); applyRemote(d.id, d.data()); }
     refreshAll();
@@ -384,6 +395,7 @@ async function connect() {
 }
 
 build(); bind();
+try { const g = localStorage.getItem(LKEY + "-general"); if (g) $("#general").value = g; } catch (e) {}
 for (const [id, a] of Object.entries(local)) applyRemote(id, a);
 for (const id of Object.keys(local)) if (allQs.some((q) => q.id === id)) dirty.add(id);
 refreshAll(); connect().then(() => { if (db && state.canWrite) for (const q of allQs) if (dirty.has(q.id)) saveAnswer(q); });
