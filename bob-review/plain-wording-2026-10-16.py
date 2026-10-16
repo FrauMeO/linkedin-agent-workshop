@@ -207,7 +207,7 @@ if "miah" not in secs:
         item["files"]["decide"] = []
         item["files"]["yesno"] = []
     q["sections"].append({"id": "miah", "title": "Miah is handling these",
-                          "blurb": "You do not need to answer anything here. Add a note only if you want to.",
+                          "blurb": "You do not need to answer anything here. You are welcome to read her submissions and add a note if you want.",
                           "questions": moved})
 
 # Section blurbs in plain words
@@ -215,6 +215,7 @@ BLURBS = {"facts": "Facts from your own records. If you don't know, say so; noth
           "permissions": "What you are comfortable with. Saying \"I don't know\" is fine.",
           "joint": "Choices you and Miah settle together.",
           "linkedin": "Miah writes your profile; these are the parts only you can answer.",
+          "miah": "You do not need to answer anything here. You are welcome to read her submissions and add a note if you want.",
           "newsletter": "Miah sets up and writes the newsletter; these are the parts only you can answer."}
 for s in q["sections"]:
     if s["id"] in BLURBS:
