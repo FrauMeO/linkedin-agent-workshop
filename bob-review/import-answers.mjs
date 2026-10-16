@@ -46,7 +46,8 @@ for (const sec of questions.sections) {
     lines.push(`### ${q.id} ${q.title}`, "", `*${q.prompt}*`, "");
     if (!a) { lines.push("- Status: Open (no answer imported)", ""); continue; }
     lines.push(`- Status: ${label[a.status] || a.status}`);
-    for (const f of q.fields || []) if ((a.fields || {})[f.key]) lines.push(`- ${f.label}: ${a.fields[f.key]}`);
+    const subs = !q.fields && q.files && (q.files.decide || []).length > 1 ? q.files.decide.map((d, i) => ({ key: "abcdefgh"[i], label: "abcdefgh"[i] + ". " + d })) : null;
+    for (const f of q.fields || subs || []) if ((a.fields || {})[f.key]) lines.push(`- ${f.label}: ${a.fields[f.key]}`);
     if (a.text) lines.push(`- Answer: ${a.text.replace(/\n/g, "\n  ")}`);
     if (a.notes) lines.push(`- Additional information: ${a.notes.replace(/\n/g, "\n  ")}`);
     lines.push("");

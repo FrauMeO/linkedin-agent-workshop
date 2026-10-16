@@ -118,6 +118,10 @@
   .primary:disabled { opacity: 0.55; cursor: not-allowed; }
   .secondary { font: 500 0.88rem var(--font-body); background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; padding: 9px 14px; cursor: pointer; width: fit-content; }
   .recorded { color: var(--ok); font-weight: 500; }
+  .subs { display: grid; gap: 12px; max-width: 62ch; }
+  .subs label.lbl { font-size: 0.88rem; line-height: 1.4; color: var(--ink); }
+  .qsaved { margin-left: auto; align-self: center; font-size: 0.85rem; color: var(--ok); font-weight: 500; }
+  .qsaved.err { color: var(--warn); }
   .sendbar { position: sticky; bottom: 0; z-index: 5; margin-top: 28px; background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; box-shadow: 0 -4px 14px rgba(0,0,0,0.06); }
   .sendbar p { margin: 0; flex: 1 1 220px; font-size: 0.88rem; color: var(--ink-soft); }
   .offline { background: var(--warn-wash); color: var(--warn); border-radius: 6px; padding: 10px 14px; margin-top: 14px; }
@@ -196,6 +200,10 @@ const el = (tag, props = {}, ...kids) => {
   return n;
 };
 const allQs = DATA.sections.flatMap((s) => s.questions);
+for (const q of allQs) if (!q.fields && q.files && q.files.decide && q.files.decide.length > 1) {
+  q._subs = true;
+  q.fields = q.files.decide.map((d, i) => { const k = "abcdefgh"[i]; return { key: k, label: k + ". " + d, long: true }; });
+}
 const FILE_LABEL = { "CONFLICT": "Files disagree", "PARTLY ANSWERED": "Partly answered", "ANSWERED BY CANON": "Answered in the files", "OPEN": "Not in the files" };
 const FILE_CLASS = { "CONFLICT": "conflict", "PARTLY ANSWERED": "partly", "ANSWERED BY CANON": "canon", "OPEN": "" };
 const STATE_LABEL = { open: "Open", answered: "Answered", discuss: "Discuss with Miah", later: "Come back later" };
@@ -260,13 +268,13 @@ function build() {
       if (q.files) {
         const f = q.files, cls = FILE_CLASS[f.status] || "";
         const box = el("div", { class: "files " + cls }, el("b", { text: "Already in the files · " + (FILE_LABEL[f.status] || f.status) }), el("span", { text: f.text }));
-        if (f.decide && f.decide.length) box.append(el("ul", {}, ...f.decide.map((d) => el("li", { text: d }))));
+        if (!q._subs && f.decide && f.decide.length) box.append(el("ul", {}, ...f.decide.map((d) => el("li", { text: d }))));
         body.push(box);
       }
       if (q.fields) {
-        const grid = el("div", { class: "fields" });
+        const grid = el("div", { class: q._subs ? "subs" : "fields" });
         for (const f of q.fields) {
-          const inp = el("input", { type: "text", id: `${q.id}-${f.key}`, inputmode: "numeric" });
+          const inp = f.long ? el("textarea", { id: `${q.id}-${f.key}`, rows: "2" }) : el("input", { type: "text", id: `${q.id}-${f.key}`, inputmode: "numeric" });
           inp.addEventListener("input", () => touch(q));
           r.fieldInputs[f.key] = inp;
           grid.append(el("div", {}, el("label", { class: "lbl", for: inp.id, text: f.label }), inp));
@@ -285,7 +293,8 @@ function build() {
       for (const [btn, val] of [[r.later, "later"], [r.discuss, "discuss"]]) {
         btn.addEventListener("click", () => { r.flag = r.flag === val ? "" : val; touch(q); });
       }
-      body.push(el("div", { class: "flags" }, r.later, r.discuss));
+      r.saved = el("span", { class: "qsaved", role: "status", "aria-live": "polite" });
+      body.push(el("div", { class: "flags" }, r.later, r.discuss, r.saved));
       r.root = el("article", { class: "q", "data-state": "open", id: "q-" + q.id }, ...body);
       r.root.dataset.tag = q.tag || "";
       els[q.id] = r;
@@ -321,6 +330,7 @@ function touch(q) {
   refreshAll();
   if (!state.canWrite) return;
   setSave("Saving…");
+  els[q.id].saved.textContent = "Saving…"; els[q.id].saved.classList.remove("err");
   clearTimeout(timers[q.id]);
   timers[q.id] = setTimeout(() => saveAnswer(q), 700);
 }
@@ -335,7 +345,12 @@ function saveAnswer(q, manual) {
   if (!db) return;
   const a = localAnswer(q);
   enqueue("answers/" + q.id, { id: q.id, title: q.title, status: derive(q, a), text: a.text, fields: a.fields, notes: a.notes, flag: a.flag, updatedAt: new Date().toISOString() })
-    .then(() => { if (!$("#savestate").classList.contains("err")) dirty.delete(q.id); else offline(); });
+    .then(() => {
+      const ok = !$("#savestate").classList.contains("err"), r = els[q.id];
+      r.saved.textContent = ok ? "✓ Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "Not saved yet";
+      r.saved.classList.toggle("err", !ok);
+      if (ok) dirty.delete(q.id); else offline();
+    });
 }
 
 function applyRemote(id, d) {
