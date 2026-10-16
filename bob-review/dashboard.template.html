@@ -220,6 +220,7 @@ const LKEY = "bob-desk-answers-v1";
 function loadLocal() { try { return JSON.parse(localStorage.getItem(LKEY) || "{}"); } catch (e) { return {}; } }
 function saveLocal(id, a) { try { const all = loadLocal(); all[id] = { ...a, updatedAt: new Date().toISOString() }; localStorage.setItem(LKEY, JSON.stringify(all)); } catch (e) {} }
 const local = loadLocal();
+function dropLocal(id) { try { const all = loadLocal(); delete all[id]; localStorage.setItem(LKEY, JSON.stringify(all)); } catch (e) {} }
 function offline() { $("#offline").hidden = false; }
 function compileAnswers() {
   const lines = [];
@@ -254,7 +255,8 @@ function localAnswer(q) {
   const r = els[q.id];
   const fields = {};
   if (q.fields) for (const f of q.fields) fields[f.key] = r.fieldInputs[f.key].value;
-  return { text: r.text ? r.text.value : "", fields, notes: r.notes.value, flag: r.flag || "" };
+  const keepText = !r.text && state.answers[q.id] && (state.answers[q.id].text || "") && !Object.values(fields).some((v) => (v || "").trim()) ? state.answers[q.id].text : "";
+  return { text: r.text ? r.text.value : keepText, fields, notes: r.notes.value, flag: r.flag || "" };
 }
 
 function build() {
@@ -331,7 +333,7 @@ function refresh(q) {
   r.chip.textContent = STATE_LABEL[st];
   r.later.setAttribute("aria-pressed", String(r.flag === "later"));
   r.discuss.setAttribute("aria-pressed", String(r.flag === "discuss"));
-  for (const y of Object.values(r.yn || {})) { y.yes.setAttribute("aria-pressed", String(y.val.value === "Yes")); y.no.setAttribute("aria-pressed", String(y.val.value === "No")); y.note.hidden = y.val.value !== "No"; }
+  for (const y of Object.values(r.yn || {})) { y.yes.setAttribute("aria-pressed", String(y.val.value === "Yes")); y.no.setAttribute("aria-pressed", String(y.val.value === "No")); y.note.hidden = y.val.value !== "No" && !y.note.value.trim(); }
   return st;
 }
 function refreshAll() {
@@ -375,12 +377,28 @@ function saveAnswer(q, manual) {
     });
 }
 
+// Answers typed before a question changed shape are moved into the new boxes, never dropped.
+function migrate(q, d) {
+  const vals = { ...(d.fields || {}) };
+  if (!q.fields) return vals;
+  for (const f of q.fields) if (f.yn && vals[f.key] && vals[f.key] !== "Yes" && vals[f.key] !== "No") {
+    vals[f.key + "_note"] = [vals[f.key], vals[f.key + "_note"]].filter(Boolean).join(" ");
+    vals[f.key] = "";
+  }
+  const old = (d.text || "").trim();
+  if (old && !q.fields.some((f) => (vals[f.key] || "").trim())) {
+    const first = q.fields.find((f) => !f.yn && !f.note) || q.fields.find((f) => f.note);
+    if (first) vals[first.key] = old;
+  }
+  return vals;
+}
+const hasContent = (a) => !!((a.text || "").trim() || (a.notes || "").trim() || a.flag || Object.values(a.fields || {}).some((v) => (v || "").trim()));
 function applyRemote(id, d) {
   const q = allQs.find((x) => x.id === id); if (!q || dirty.has(id)) return;
   if (local[id] && local[id].updatedAt && d.updatedAt && local[id].updatedAt > d.updatedAt) return;
-  const r = els[id];
+  const r = els[id], vals = migrate(q, d);
   if (r.text && document.activeElement !== r.text) r.text.value = d.text || "";
-  if (q.fields) for (const f of q.fields) if (document.activeElement !== r.fieldInputs[f.key]) r.fieldInputs[f.key].value = (d.fields || {})[f.key] || "";
+  if (q.fields) for (const f of q.fields) if (document.activeElement !== r.fieldInputs[f.key]) r.fieldInputs[f.key].value = vals[f.key] || "";
   if (document.activeElement !== r.notes) r.notes.value = d.notes || "";
   r.flag = d.flag || "";
 }
@@ -423,8 +441,19 @@ async function connect() {
   if (user && typeof user.can === "function") { const c = user.can("data.write"); if (c === false) { state.canWrite = false; $("#readonly").hidden = false; for (const t of document.querySelectorAll("textarea,input,.flags button,#record")) t.disabled = true; } }
   db = await claude.use("db").catch(() => null);
   if (!db) { offline(); return; }
+  let first = true;
   db.collection("answers").onSnapshot((snap) => {
     for (const d of snap.docs) { state.answers[d.id] = d.data(); applyRemote(d.id, d.data()); }
+    if (first) {
+      first = false;
+      for (const q of allQs) {
+        const l = local[q.id]; if (!l) continue;
+        const rmt = state.answers[q.id];
+        const localNewer = !rmt || !rmt.updatedAt || (l.updatedAt && l.updatedAt > rmt.updatedAt);
+        if (localNewer && hasContent(l) && state.canWrite) saveAnswer(q);
+        else { dirty.delete(q.id); delete local[q.id]; dropLocal(q.id); if (rmt) applyRemote(q.id, rmt); }
+      }
+    }
     refreshAll();
   }, (e) => setSave("Live connection lost: " + (e.message || e.code), true));
   db.doc("meta/approval").onSnapshot((s) => { if (s.exists) { state.approval = s.data(); setApproval(s.data()); } });
@@ -434,6 +463,5 @@ async function connect() {
 build(); bind();
 try { const g = localStorage.getItem(LKEY + "-general"); if (g) $("#general").value = g; } catch (e) {}
 for (const [id, a] of Object.entries(local)) applyRemote(id, a);
-for (const id of Object.keys(local)) if (allQs.some((q) => q.id === id)) dirty.add(id);
-refreshAll(); connect().then(() => { if (db && state.canWrite) for (const q of allQs) if (dirty.has(q.id)) saveAnswer(q); });
+refreshAll(); connect();
 </script>

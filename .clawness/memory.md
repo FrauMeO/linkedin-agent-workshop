@@ -10,3 +10,4 @@
 ## Lessons
 - bob-review desk: outside Editors cannot save while the artifact is shared by public link; turn link sharing off.
 - bob-review desk: questions whose files.decide has 2+ items render as a/b/c boxes (dashboard.template.html).
+- bob-review desk: never resave device copies on load; newer non-empty copy wins (connect() reconcile in template).
